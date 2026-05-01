@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -30,13 +31,18 @@ import { UserProfile } from '../core/models/user.model';
 export class ProfileComponent implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly fb = inject(FormBuilder);
+  private readonly route = inject(ActivatedRoute);
   private readonly baseUrl = environment.apiUrl;
+
+  private userId: string | null = null;
 
   readonly loading = signal(false);
   readonly saving = signal(false);
   readonly loadError = signal<string | null>(null);
   readonly saveError = signal<string | null>(null);
   readonly saveSuccess = signal(false);
+  readonly isAdminView = signal(false);
+  readonly profileName = signal('');
 
   readonly form = this.fb.nonNullable.group({
     fullName: ['', [Validators.required]],
@@ -47,6 +53,9 @@ export class ProfileComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    this.userId = this.route.snapshot.paramMap.get('id');
+    console.log('User ID:', this.userId); // Agregado para depuración
+    this.isAdminView.set(!!this.userId);
     this.loadProfile();
   }
 
@@ -59,9 +68,13 @@ export class ProfileComponent implements OnInit {
       return;
     }
 
+    const url = this.userId
+      ? `${this.baseUrl}/api/users/${this.userId}`
+      : `${this.baseUrl}/api/users/me`;
+
     this.saving.set(true);
     this.http
-      .put<ApiResponse<UserProfile>>(`${this.baseUrl}/api/users/me`, this.form.getRawValue())
+      .put<ApiResponse<UserProfile>>(url, this.form.getRawValue())
       .pipe(finalize(() => this.saving.set(false)))
       .subscribe({
         next: () => this.saveSuccess.set(true),
@@ -76,12 +89,17 @@ export class ProfileComponent implements OnInit {
     this.loadError.set(null);
     this.loading.set(true);
 
+    const url = this.userId
+      ? `${this.baseUrl}/api/users/${this.userId}`
+      : `${this.baseUrl}/api/users/me`;
+
     this.http
-      .get<ApiResponse<UserProfile>>(`${this.baseUrl}/api/users/me`)
+      .get<ApiResponse<UserProfile>>(url)
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: (res) => {
           const profile = res.data;
+          this.profileName.set(profile.fullName ?? '');
           this.form.patchValue({
             fullName: profile.fullName ?? '',
             phone: profile.phone ?? '',

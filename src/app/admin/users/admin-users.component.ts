@@ -89,6 +89,17 @@ export class AdminUsersComponent implements OnInit {
     });
   }
 
+  openEditDialog(user: UserProfile): void {
+    const dialogRef = this.dialog.open(CreateUserDialogComponent, {
+      width: '480px',
+      disableClose: true,
+      data: { user },
+    });
+    dialogRef.afterClosed().subscribe((updated) => {
+      if (updated) this.loadUsers();
+    });
+  }
+
   changeRole(user: UserProfile, newRole: string): void {
     this.http
       .put<ApiResponse<UserProfile>>(

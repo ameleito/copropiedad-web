@@ -1,14 +1,17 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { finalize } from 'rxjs/operators';
+import { debounceTime, finalize } from 'rxjs/operators';
 import { AuthService } from '../../auth/services/auth.service';
 import {
   PKG_STATUS_COLORS,
@@ -28,6 +31,7 @@ type StatusFilter = PackageStatusType | 'ALL';
   standalone: true,
   imports: [
     CommonModule,
+    ReactiveFormsModule,
     MatCardModule,
     MatButtonModule,
     MatIconModule,
@@ -36,6 +40,8 @@ type StatusFilter = PackageStatusType | 'ALL';
     MatProgressSpinnerModule,
     MatBadgeModule,
     MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
   ],
   templateUrl: './package-list.component.html',
   styleUrl: './package-list.component.scss',
@@ -44,6 +50,7 @@ export class PackageListComponent {
   private readonly pkgService = inject(PackageService);
   private readonly auth = inject(AuthService);
   private readonly dialog = inject(MatDialog);
+  private readonly fb = inject(FormBuilder);
 
   readonly loading = signal(false);
   readonly items = signal<PackageResponse[]>([]);
@@ -56,6 +63,12 @@ export class PackageListComponent {
   readonly labels = PKG_STATUS_LABELS;
   readonly colors = PKG_STATUS_COLORS;
   readonly icons = PKG_STATUS_ICONS;
+
+  readonly filterForm = this.fb.group({
+    unitNumber: [''],
+    dateFrom: [''],
+    dateTo: [''],
+  });
 
   readonly filterChips: { value: StatusFilter; label: string }[] = [
     { value: 'ALL', label: 'Todos' },
@@ -76,6 +89,12 @@ export class PackageListComponent {
 
   constructor() {
     this.loadPackages();
+    this.filterForm.valueChanges
+      .pipe(debounceTime(400))
+      .subscribe(() => {
+        this.pageIndex.set(0);
+        this.loadPackages();
+      });
   }
 
   chipActive(value: StatusFilter): boolean {
@@ -126,14 +145,27 @@ export class PackageListComponent {
     });
   }
 
+  clearFilters(): void {
+    this.filterForm.reset({ unitNumber: '', dateFrom: '', dateTo: '' });
+  }
+
   private loadPackages(): void {
     this.loading.set(true);
     this.loadError.set(null);
+
     const filter = this.statusFilter();
     const statusParam = filter === 'ALL' ? undefined : filter;
+    const { unitNumber, dateFrom, dateTo } = this.filterForm.value;
 
     this.pkgService
-      .list(this.pageIndex(), this.pageSize(), statusParam)
+      .list(
+        this.pageIndex(),
+        this.pageSize(),
+        statusParam,
+        unitNumber || undefined,
+        dateFrom || undefined,
+        dateTo || undefined,
+      )
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: (page) => {

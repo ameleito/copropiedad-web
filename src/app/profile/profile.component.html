@@ -1,8 +1,13 @@
 <section class="profile">
   <mat-card appearance="outlined">
     <mat-card-header>
-      <mat-card-title>Mi perfil</mat-card-title>
-      <mat-card-subtitle>Actualiza tu información de contacto y preferencias.</mat-card-subtitle>
+      @if (isAdminView()) {
+        <mat-card-title>Perfil de {{ profileName() }}</mat-card-title>
+        <mat-card-subtitle>Editar información del usuario.</mat-card-subtitle>
+      } @else {
+        <mat-card-title>Mi perfil</mat-card-title>
+        <mat-card-subtitle>Actualiza tu información de contacto y preferencias.</mat-card-subtitle>
+      }
     </mat-card-header>
 
     <mat-card-content>

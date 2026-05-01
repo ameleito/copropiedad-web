@@ -33,6 +33,7 @@ export const routes: Routes = [
     children: [
       { path: 'dashboard', component: DashboardComponent },
       { path: 'profile', component: ProfileComponent },
+      { path: 'profile/:id', component: ProfileComponent, canActivate: [roleGuard('ADMIN')] },
       { path: 'pqr', component: PqrListComponent },
       { path: 'pqr/new', component: PqrCreateComponent },
       { path: 'pqr/:id', component: PqrDetailComponent },

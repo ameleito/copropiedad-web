@@ -7,7 +7,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -23,6 +23,10 @@ const SEED_BUILDING_ID = 'a0000000-0000-0000-0000-000000000001';
 interface TowerOption { id: string; name: string; totalFloors: number; }
 interface UnitOption { id: string; number: string; floor: number | null; type: string; towerName: string | null; }
 interface TorreGroup { name: string; towers: TowerOption[]; }
+
+export interface EditUserData {
+  user: UserProfile;
+}
 
 @Component({
   selector: 'app-create-user-dialog',
@@ -45,11 +49,14 @@ export class CreateUserDialogComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly http = inject(HttpClient);
   private readonly dialogRef = inject(MatDialogRef<CreateUserDialogComponent>);
+  private readonly editData = inject<EditUserData | null>(MAT_DIALOG_DATA, { optional: true });
+
+  readonly isEditMode = !!this.editData?.user;
 
   readonly form = this.fb.nonNullable.group({
     fullName: ['', [Validators.required]],
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(8)]],
+    password: ['', this.isEditMode ? [] : [Validators.required, Validators.minLength(8)]],
     phone: [''],
     idDocument: [''],
     role: ['RESIDENT' as string, [Validators.required]],
@@ -78,13 +85,25 @@ export class CreateUserDialogComponent implements OnInit {
   ngOnInit(): void {
     this.loadTowers();
     this.loadUnits();
+    if (this.isEditMode && this.editData?.user) {
+      const u = this.editData.user;
+      this.form.patchValue({
+        fullName: u.fullName ?? '',
+        email: u.email ?? '',
+        phone: u.phone ?? '',
+        idDocument: u.idDocument ?? '',
+        role: u.role ?? 'RESIDENT',
+        unitId: u.unitId ?? '',
+      });
+      this.form.controls.email.disable();
+    }
   }
 
   onTorreChange(torre: string): void {
     this.selectedTorre.set(torre);
     this.selectedTowerId.set('');
     this.form.controls.unitId.reset();
-    const group = this.torreGroups().find(g => g.name === torre);
+    const group = this.torreGroups().find((g) => g.name === torre);
     this.interiorsForTorre.set(group?.towers ?? []);
     this.filteredUnits.set([]);
   }
@@ -92,10 +111,10 @@ export class CreateUserDialogComponent implements OnInit {
   onInteriorChange(towerId: string): void {
     this.selectedTowerId.set(towerId);
     this.form.controls.unitId.reset();
-    const tower = this.towers().find(t => t.id === towerId);
+    const tower = this.towers().find((t) => t.id === towerId);
     this.filteredUnits.set(
       this.allUnits()
-        .filter(u => tower && u.towerName === tower.name)
+        .filter((u) => tower && u.towerName === tower.name)
         .sort((a, b) => {
           const fd = (a.floor ?? 0) - (b.floor ?? 0);
           return fd !== 0 ? fd : parseInt(a.number) - parseInt(b.number);
@@ -110,20 +129,45 @@ export class CreateUserDialogComponent implements OnInit {
       return;
     }
     this.submitting = true;
-    const { fullName, email, password, phone, idDocument, role, unitId } = this.form.getRawValue();
-    const body: Record<string, unknown> = { fullName, email, password, phone, idDocument, role };
-    if (unitId) body['unitId'] = unitId;
+    const { fullName, email, password, phone, idDocument, role, unitId } =
+      this.form.getRawValue();
 
-    this.http
-      .post<ApiResponse<UserProfile>>(`${environment.apiUrl}/api/users`, body)
-      .pipe(finalize(() => (this.submitting = false)))
-      .subscribe({
-        next: () => this.dialogRef.close(true),
-        error: (err) => {
-          this.errorMessage =
-            err?.error?.message ?? 'No se pudo crear el usuario.';
-        },
-      });
+    if (this.isEditMode) {
+      const userId = this.editData!.user.id;
+      const body: Record<string, unknown> = { fullName, phone, idDocument, role };
+      if (unitId) body['unitId'] = unitId;
+      this.http
+        .put<ApiResponse<UserProfile>>(
+          `${environment.apiUrl}/api/users/${userId}`,
+          body,
+        )
+        .pipe(finalize(() => (this.submitting = false)))
+        .subscribe({
+          next: () => this.dialogRef.close(true),
+          error: (err) => {
+            this.errorMessage =
+              err?.error?.message ?? 'No se pudo actualizar el usuario.';
+          },
+        });
+    } else {
+      const body: Record<string, unknown> = {
+        fullName, email, password, phone, idDocument, role,
+      };
+      if (unitId) body['unitId'] = unitId;
+      this.http
+        .post<ApiResponse<UserProfile>>(
+          `${environment.apiUrl}/api/users`,
+          body,
+        )
+        .pipe(finalize(() => (this.submitting = false)))
+        .subscribe({
+          next: () => this.dialogRef.close(true),
+          error: (err) => {
+            this.errorMessage =
+              err?.error?.message ?? 'No se pudo crear el usuario.';
+          },
+        });
+    }
   }
 
   cancel(): void {
@@ -148,7 +192,9 @@ export class CreateUserDialogComponent implements OnInit {
           }
           this.torreGroups.set(
             Array.from(groups.entries())
-              .sort(([a], [b]) => a.localeCompare(b, undefined, { numeric: true }))
+              .sort(([a], [b]) =>
+                a.localeCompare(b, undefined, { numeric: true }),
+              )
               .map(([name, towers]) => ({ name, towers })),
           );
         },

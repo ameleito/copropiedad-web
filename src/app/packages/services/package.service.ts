@@ -21,11 +21,19 @@ export class PackageService {
       .pipe(map((res) => res.data));
   }
 
-  list(page = 0, size = 20, status?: string): Observable<PageResponse<PackageResponse>> {
+  list(
+    page = 0,
+    size = 20,
+    status?: string,
+    unitNumber?: string,
+    dateFrom?: string,
+    dateTo?: string,
+  ): Observable<PageResponse<PackageResponse>> {
     let params = new HttpParams().set('page', page).set('size', size);
-    if (status) {
-      params = params.set('status', status);
-    }
+    if (status)     params = params.set('status', status);
+    if (unitNumber) params = params.set('unitNumber', unitNumber);
+    if (dateFrom)   params = params.set('dateFrom', dateFrom);
+    if (dateTo)     params = params.set('dateTo', dateTo);
     return this.http
       .get<ApiResponse<PageResponse<PackageResponse>>>(this.baseUrl, { params })
       .pipe(map((res) => res.data));

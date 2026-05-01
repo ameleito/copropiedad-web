@@ -18,6 +18,33 @@
         </mat-chip>
       }
     </mat-chip-set>
+
+    <form [formGroup]="filterForm" class="filter-bar">
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Apartamento</mat-label>
+        <mat-icon matPrefix>apartment</mat-icon>
+        <input matInput formControlName="unitNumber" placeholder="Ej: 101" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Fecha desde</mat-label>
+        <mat-icon matPrefix>calendar_today</mat-icon>
+        <input matInput type="date" formControlName="dateFrom" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Fecha hasta</mat-label>
+        <mat-icon matPrefix>event</mat-icon>
+        <input matInput type="date" formControlName="dateTo" />
+      </mat-form-field>
+
+      <button mat-stroked-button type="button" class="clear-btn"
+              (click)="clearFilters()"
+              [disabled]="!filterForm.value.unitNumber && !filterForm.value.dateFrom && !filterForm.value.dateTo">
+        <mat-icon>filter_alt_off</mat-icon>
+        Limpiar
+      </button>
+    </form>
   </header>
 
   @if (loadError()) {

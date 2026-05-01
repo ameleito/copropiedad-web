@@ -1,4 +1,4 @@
-<h2 mat-dialog-title>Crear nuevo usuario</h2>
+<h2 mat-dialog-title>{{ isEditMode ? 'Editar usuario' : 'Crear nuevo usuario' }}</h2>
 
 <mat-dialog-content>
   @if (errorMessage) {
@@ -21,14 +21,16 @@
       <mat-icon matPrefix>mail</mat-icon>
     </mat-form-field>
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Contraseña</mat-label>
-      <input matInput type="password" formControlName="password" />
-      <mat-icon matPrefix>lock</mat-icon>
-      @if (form.controls.password.hasError('minlength') && form.controls.password.touched) {
-        <mat-error>Mínimo 8 caracteres</mat-error>
-      }
-    </mat-form-field>
+    @if (!isEditMode) {
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Contraseña</mat-label>
+        <input matInput type="password" formControlName="password" />
+        <mat-icon matPrefix>lock</mat-icon>
+        @if (form.controls.password.hasError('minlength') && form.controls.password.touched) {
+          <mat-error>Mínimo 8 caracteres</mat-error>
+        }
+      </mat-form-field>
+    }
 
     <div class="row-2col">
       <mat-form-field appearance="outline">
@@ -102,7 +104,7 @@
     @if (submitting) {
       <mat-progress-spinner diameter="18" mode="indeterminate" />
     } @else {
-      Crear Usuario
+      {{ isEditMode ? 'Guardar Cambios' : 'Crear Usuario' }}
     }
   </button>
 </mat-dialog-actions>

@@ -79,8 +79,8 @@
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef></th>
           <td mat-cell *matCellDef="let u">
-            <button mat-icon-button matTooltip="Ver detalle" [routerLink]="['/profile']">
-              <mat-icon>visibility</mat-icon>
+            <button mat-icon-button matTooltip="Editar usuario" (click)="openEditDialog(u)">
+              <mat-icon>edit</mat-icon>
             </button>
           </td>
         </ng-container>

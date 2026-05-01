@@ -34,6 +34,25 @@
   margin-bottom: 12px;
 }
 
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.filter-field {
+  flex: 1 1 180px;
+  min-width: 160px;
+}
+
+.clear-btn {
+  height: 56px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
 .error-banner {
   margin-bottom: 16px;
   mat-card-content {
