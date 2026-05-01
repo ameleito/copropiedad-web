@@ -1,0 +1,61 @@
+<h2 mat-dialog-title>{{ editing ? 'Editar área común' : 'Nueva área común' }}</h2>
+
+<mat-dialog-content class="dialog-body">
+  <form [formGroup]="form" class="form-stack">
+    <mat-form-field appearance="outline">
+      <mat-label>Nombre</mat-label>
+      <input matInput formControlName="name" />
+      @if (form.controls.name.hasError('required') && form.controls.name.touched) {
+        <mat-error>Requerido</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Descripción</mat-label>
+      <textarea matInput formControlName="description" rows="2"></textarea>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Capacidad (opcional)</mat-label>
+      <input matInput type="number" min="1" formControlName="capacity" />
+    </mat-form-field>
+
+    <div class="row-check">
+      <mat-checkbox formControlName="requiresDeposit">Requiere depósito</mat-checkbox>
+    </div>
+
+    @if (form.controls.requiresDeposit.value) {
+      <mat-form-field appearance="outline">
+        <mat-label>Monto depósito</mat-label>
+        <input matInput type="number" min="0" formControlName="depositAmount" />
+        <mat-icon matPrefix>attach_money</mat-icon>
+      </mat-form-field>
+    }
+
+    <div class="row-2">
+      <mat-form-field appearance="outline">
+        <mat-label>Máx. horas por reserva</mat-label>
+        <input matInput type="number" min="1" max="24" formControlName="maxHours" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Días de anticipación máx.</mat-label>
+        <input matInput type="number" min="0" formControlName="advanceDays" />
+      </mat-form-field>
+    </div>
+  </form>
+
+  @if (errorMessage()) {
+    <p class="error-text">{{ errorMessage() }}</p>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" mat-dialog-close [disabled]="submitting()">Cerrar</button>
+  <button mat-flat-button color="primary" type="button" (click)="submit()" [disabled]="submitting()">
+    @if (submitting()) {
+      <mat-progress-spinner diameter="20" mode="indeterminate" />
+    } @else {
+      Guardar
+    }
+  </button>
+</mat-dialog-actions>

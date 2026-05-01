@@ -1,0 +1,57 @@
+<h2 mat-dialog-title>Agregar mascota</h2>
+
+<mat-dialog-content>
+  @if (errorMessage()) {
+    <div class="error-banner" role="alert">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+
+  <form [formGroup]="form" class="dialog-form" (ngSubmit)="submit()">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Nombre</mat-label>
+      <input matInput formControlName="name" autocomplete="off" />
+      <mat-icon matPrefix>pets</mat-icon>
+      @if (form.controls.name.touched && form.controls.name.hasError('required')) {
+        <mat-error>El nombre es obligatorio</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Especie</mat-label>
+      <mat-select formControlName="species" placeholder="Seleccione">
+        @for (opt of speciesOptions; track opt.value) {
+          <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+        }
+      </mat-select>
+      <mat-icon matPrefix>category</mat-icon>
+      @if (form.controls.species.touched && form.controls.species.hasError('required')) {
+        <mat-error>La especie es obligatoria</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Raza</mat-label>
+      <input matInput formControlName="breed" />
+      <mat-icon matPrefix>badge</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Color</mat-label>
+      <input matInput formControlName="color" />
+      <mat-icon matPrefix>palette</mat-icon>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()" [disabled]="submitting()">Cancelar</button>
+  <button mat-flat-button color="primary" type="button" (click)="submit()" [disabled]="submitting()">
+    @if (submitting()) {
+      <mat-progress-spinner diameter="20" mode="indeterminate" />
+    } @else {
+      Registrar
+    }
+  </button>
+</mat-dialog-actions>

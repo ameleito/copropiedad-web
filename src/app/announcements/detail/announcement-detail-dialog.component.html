@@ -1,0 +1,35 @@
+<h2 mat-dialog-title class="detail-title">
+  <mat-icon class="dialog-icon">campaign</mat-icon>
+  {{ data.title }}
+</h2>
+
+<mat-dialog-content>
+  <div class="meta-row">
+    <mat-chip-set>
+      <mat-chip>
+        <mat-icon class="chip-icon">{{ scopeIcons[data.scope] }}</mat-icon>
+        {{ scopeLabels[data.scope] }}
+      </mat-chip>
+    </mat-chip-set>
+    <span class="meta-text">
+      <mat-icon inline>person</mat-icon>
+      {{ data.createdByName }}
+    </span>
+    <span class="meta-text">
+      <mat-icon inline>schedule</mat-icon>
+      {{ data.createdAt | date: 'dd/MM/yyyy HH:mm' }}
+    </span>
+  </div>
+
+  <div class="body-content" [innerHTML]="data.body | slice:0:5000"></div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  @if (isAdmin) {
+    <button mat-button color="warn" (click)="deleteAndClose()">
+      <mat-icon>delete</mat-icon>
+      Eliminar
+    </button>
+  }
+  <button mat-flat-button color="primary" (click)="close()">Cerrar</button>
+</mat-dialog-actions>

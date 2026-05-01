@@ -1,0 +1,42 @@
+<h2 mat-dialog-title>Registrar Lectura</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="dialog-form" (ngSubmit)="submit()">
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Período (YYYY-MM)</mat-label>
+      <input matInput formControlName="period" placeholder="2026-04" autocomplete="off" />
+      @if (form.controls.period.touched && form.controls.period.hasError('required')) {
+        <mat-error>Requerido</mat-error>
+      }
+      @if (form.controls.period.touched && form.controls.period.hasError('pattern')) {
+        <mat-error>Use el formato YYYY-MM</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Lectura</mat-label>
+      <input matInput type="number" formControlName="readingValue" />
+      @if (form.controls.readingValue.touched && form.controls.readingValue.hasError('required')) {
+        <mat-error>Requerido</mat-error>
+      }
+      @if (form.controls.readingValue.touched && form.controls.readingValue.hasError('min')) {
+        <mat-error>El valor no puede ser negativo</mat-error>
+      }
+    </mat-form-field>
+
+    @if (errorMessage()) {
+      <p class="error-text">{{ errorMessage() }}</p>
+    }
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()" [disabled]="submitting()">Cancelar</button>
+  <button mat-flat-button color="primary" type="button" (click)="submit()" [disabled]="submitting()">
+    @if (submitting()) {
+      <mat-spinner diameter="20" />
+    } @else {
+      Guardar
+    }
+  </button>
+</mat-dialog-actions>

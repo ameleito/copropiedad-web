@@ -1,0 +1,160 @@
+.bookings-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.page-header {
+  margin-bottom: 24px;
+}
+
+.title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.page-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin: 0;
+  flex: 1;
+}
+
+.title-icon {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+}
+
+.subtitle {
+  margin: 0;
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 0.95rem;
+}
+
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin: 0 0 12px;
+}
+
+.areas-section {
+  margin-bottom: 32px;
+}
+
+.table-section {
+  margin-bottom: 16px;
+}
+
+.error-banner mat-card-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.loading-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 32px 0;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 16px;
+
+  &.compact {
+    padding: 24px 16px;
+  }
+}
+
+.empty-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  color: rgba(0, 0, 0, 0.2);
+}
+
+.empty-title {
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 8px 0 4px;
+}
+
+.empty-hint {
+  color: rgba(0, 0, 0, 0.5);
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.area-card {
+  border-left: 4px solid var(--mat-sys-primary, #3f51b5);
+
+  &.inactive {
+    opacity: 0.72;
+    border-left-color: rgba(0, 0, 0, 0.26);
+  }
+}
+
+.area-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(63, 81, 181, 0.12);
+  color: var(--mat-sys-primary, #3f51b5);
+}
+
+.area-desc {
+  margin: 0 0 8px;
+  font-size: 0.9rem;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.deposit-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.875rem;
+}
+
+.inactive-label {
+  font-size: 0.875rem;
+  color: rgba(0, 0, 0, 0.5);
+  padding: 0 8px;
+}
+
+.table-card {
+  overflow: auto;
+}
+
+.bookings-table {
+  width: 100%;
+}
+
+.paginator {
+  margin-top: 12px;
+}
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dash {
+  color: rgba(0, 0, 0, 0.35);
+}

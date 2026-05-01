@@ -1,0 +1,26 @@
+.dialog-body {
+  min-width: 320px;
+  max-width: 480px;
+}
+
+.form-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.row-check {
+  margin: 0.25rem 0 0.5rem;
+}
+
+.error-text {
+  color: var(--mat-form-field-error-text-color, #f44336);
+  margin: 0.5rem 0 0;
+  font-size: 0.875rem;
+}

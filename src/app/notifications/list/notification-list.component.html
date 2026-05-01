@@ -1,0 +1,49 @@
+<div class="page-container">
+  <div class="page-header">
+    <h2>Notificaciones</h2>
+    @if (notifications.length > 0) {
+      <button mat-stroked-button color="primary" (click)="markAllRead()">
+        <mat-icon>done_all</mat-icon>
+        Marcar todas como leídas
+      </button>
+    }
+  </div>
+
+  @if (loading) {
+    <div class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+  } @else if (notifications.length === 0) {
+    <div class="empty-state">
+      <mat-icon class="empty-icon">notifications_none</mat-icon>
+      <p>No tienes notificaciones aún</p>
+    </div>
+  } @else {
+    <div class="notif-cards">
+      @for (notif of notifications; track notif.id) {
+        <mat-card
+          class="notif-card"
+          [class.unread]="!notif.read"
+          (click)="markAsRead(notif)">
+          <mat-card-header>
+            <mat-icon mat-card-avatar class="notif-icon">{{ iconForType(notif.type) }}</mat-icon>
+            <mat-card-title class="notif-title">{{ notif.title }}</mat-card-title>
+            <mat-card-subtitle>{{ formatDate(notif.createdAt) }}</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <p>{{ notif.body }}</p>
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+
+    <mat-paginator
+      [length]="totalElements"
+      [pageSize]="pageSize"
+      [pageIndex]="currentPage"
+      [pageSizeOptions]="[10, 20, 50]"
+      (page)="onPage($event)"
+      showFirstLastButtons>
+    </mat-paginator>
+  }
+</div>

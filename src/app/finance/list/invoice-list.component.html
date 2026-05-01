@@ -1,0 +1,119 @@
+<div class="inv-list-page">
+  <header class="page-header">
+    <div class="title-row">
+      <h1 class="page-title" matBadge="{{ totalElements() }}" matBadgeOverlap="false" [matBadgeHidden]="totalElements() === 0">
+        <mat-icon aria-hidden="true" class="title-icon">payments</mat-icon>
+        Pagos y Facturas
+      </h1>
+    </div>
+
+    <mat-chip-set class="filter-chips" aria-label="Filtrar por estado">
+      @for (chip of filterChips; track chip.value) {
+        <mat-chip
+          [highlighted]="chipActive(chip.value)"
+          (click)="setFilter(chip.value)"
+          tabindex="0"
+          role="button">
+          {{ chip.label }}
+        </mat-chip>
+      }
+    </mat-chip-set>
+  </header>
+
+  @if (loadError()) {
+    <mat-card class="error-banner" appearance="outlined">
+      <mat-card-content>
+        <mat-icon color="warn">error_outline</mat-icon>
+        <span>{{ loadError() }}</span>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  @if (loading()) {
+    <div class="loading-wrap">
+      <mat-progress-spinner mode="indeterminate" diameter="48" />
+      <span>Cargando facturas…</span>
+    </div>
+  } @else if (!items().length) {
+    <div class="empty-state">
+      <mat-icon class="empty-icon">receipt_long</mat-icon>
+      <p class="empty-title">No hay facturas</p>
+      <p class="empty-hint">Las facturas generadas aparecerán aquí.</p>
+    </div>
+  } @else {
+    <div class="card-grid">
+      @for (inv of items(); track inv.id) {
+        <mat-card
+          class="inv-card"
+          [style.border-left-color]="colors[inv.status]"
+          appearance="outlined"
+          (click)="openDetail(inv)">
+          <mat-card-header>
+            <div mat-card-avatar class="inv-avatar">
+              <mat-icon>{{ icons[inv.status] }}</mat-icon>
+            </div>
+            <mat-card-title>{{ formatPeriod(inv.period) }}</mat-card-title>
+            <mat-card-subtitle>Apto {{ inv.unitNumber }} · {{ inv.towerName ?? '' }}</mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content>
+            <div class="meta-row">
+              <mat-chip-set>
+                <mat-chip [ngStyle]="statusChipStyle(inv.status)">
+                  {{ labels[inv.status] }}
+                </mat-chip>
+              </mat-chip-set>
+              @if (inv.feeTypeName) {
+                <span class="fee-badge">{{ inv.feeTypeName }}</span>
+              }
+            </div>
+
+            <div class="amount-row">
+              <span class="amount-label">Monto:</span>
+              <span class="amount-value">{{ inv.amount | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</span>
+            </div>
+
+            @if (inv.lateFee > 0) {
+              <div class="amount-row late">
+                <span class="amount-label">Mora:</span>
+                <span class="amount-value">{{ inv.lateFee | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</span>
+              </div>
+            }
+
+            <div class="amount-row total">
+              <span class="amount-label">Total:</span>
+              <span class="amount-value">{{ inv.totalAmount | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</span>
+            </div>
+
+            <div class="info-row">
+              <mat-icon inline>event</mat-icon>
+              <span>Vence: {{ inv.dueDate | date: 'dd/MM/yyyy' }}</span>
+            </div>
+
+            @if (inv.paidAt) {
+              <div class="info-row">
+                <mat-icon inline>check_circle</mat-icon>
+                <span>Pagada: {{ inv.paidAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+            }
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+  }
+
+  <mat-paginator
+    class="paginator"
+    [length]="totalElements()"
+    [pageIndex]="pageIndex()"
+    [pageSize]="pageSize()"
+    [pageSizeOptions]="[10, 20, 50]"
+    showFirstLastButtons
+    (page)="onPage($event)" />
+</div>
+
+@if (isAdmin()) {
+  <button mat-fab class="fab-create" color="primary" (click)="openCreate()" aria-label="Crear factura">
+    <mat-icon>add</mat-icon>
+  </button>
+}

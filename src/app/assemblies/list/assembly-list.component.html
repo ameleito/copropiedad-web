@@ -1,0 +1,83 @@
+<div class="asm-list-page">
+  <header class="page-header">
+    <div class="title-row">
+      <h1 class="page-title">
+        <mat-icon aria-hidden="true" class="title-icon">how_to_vote</mat-icon>
+        Asambleas
+      </h1>
+      @if (isAdmin()) {
+        <button mat-raised-button color="primary" type="button" (click)="openCreate()">
+          <mat-icon>add</mat-icon>
+          Crear Asamblea
+        </button>
+      }
+    </div>
+  </header>
+
+  @if (loadError()) {
+    <mat-card class="error-banner" appearance="outlined">
+      <mat-card-content>
+        <mat-icon color="warn">error_outline</mat-icon>
+        <span>{{ loadError() }}</span>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  @if (loading()) {
+    <div class="loading-wrap">
+      <mat-progress-spinner mode="indeterminate" diameter="48" />
+      <span>Cargando asambleas…</span>
+    </div>
+  } @else if (!items().length) {
+    <div class="empty-state">
+      <mat-icon class="empty-icon">event_busy</mat-icon>
+      <p class="empty-title">No hay asambleas</p>
+      <p class="empty-hint">Las asambleas programadas aparecerán aquí.</p>
+    </div>
+  } @else {
+    <div class="card-grid">
+      @for (asm of items(); track asm.id) {
+        <mat-card class="asm-card" appearance="outlined" (click)="openDetail(asm)">
+          <mat-card-header>
+            <div mat-card-avatar class="asm-avatar">
+              <mat-icon>groups</mat-icon>
+            </div>
+            <mat-card-title>{{ asm.title }}</mat-card-title>
+            <mat-card-subtitle>{{ typeLabel(asm.type) }}</mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content>
+            <div class="meta-row">
+              <mat-chip-set>
+                <mat-chip [color]="statusChipColor(asm.status)">{{ statusLabel(asm.status) }}</mat-chip>
+              </mat-chip-set>
+            </div>
+            <div class="fact-row">
+              <mat-icon inline>event</mat-icon>
+              <span>{{ asm.scheduledAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+            <div class="facts">
+              <span>
+                <mat-icon inline>people</mat-icon>
+                {{ asm.attendeeCount }} asistentes
+              </span>
+              <span>
+                <mat-icon inline>list_alt</mat-icon>
+                {{ asm.agendaItemCount }} puntos de agenda
+              </span>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+  }
+
+  <mat-paginator
+    class="paginator"
+    [length]="totalElements()"
+    [pageIndex]="pageIndex()"
+    [pageSize]="pageSize()"
+    [pageSizeOptions]="[10, 20, 50]"
+    showFirstLastButtons
+    (page)="onPage($event)" />
+</div>

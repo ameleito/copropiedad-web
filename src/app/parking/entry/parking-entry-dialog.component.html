@@ -1,0 +1,58 @@
+<h2 mat-dialog-title>Registrar ingreso</h2>
+
+<mat-dialog-content>
+  @if (errorMessage()) {
+    <div class="error-banner" role="alert">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+
+  @if (spotsLoading()) {
+    <div class="loading-inline">
+      <mat-progress-spinner diameter="32" mode="indeterminate" />
+      <span>Cargando cupos…</span>
+    </div>
+  } @else if (spotsError()) {
+    <p class="warn-text">{{ spotsError() }}</p>
+  }
+
+  <form [formGroup]="form" class="dialog-form" (ngSubmit)="submit()">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Placa</mat-label>
+      <input matInput formControlName="plate" (input)="onPlateInput()" autocomplete="off" />
+      <mat-icon matPrefix>pin</mat-icon>
+      @if (form.controls.plate.touched && form.controls.plate.hasError('required')) {
+        <mat-error>La placa es obligatoria</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Cupo (opcional)</mat-label>
+      <mat-select formControlName="spotId">
+        <mat-option value="">Sin cupo asignado</mat-option>
+        @for (s of availableSpots(); track s.id) {
+          <mat-option [value]="s.id">{{ spotOptionLabel(s) }}</mat-option>
+        }
+      </mat-select>
+      <mat-icon matPrefix>local_parking</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Notas</mat-label>
+      <textarea matInput formControlName="notes" rows="2"></textarea>
+      <mat-icon matPrefix>notes</mat-icon>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()" [disabled]="submitting()">Cancelar</button>
+  <button mat-flat-button color="primary" type="button" (click)="submit()" [disabled]="submitting() || spotsLoading()">
+    @if (submitting()) {
+      <mat-progress-spinner diameter="20" mode="indeterminate" />
+    } @else {
+      Registrar ingreso
+    }
+  </button>
+</mat-dialog-actions>

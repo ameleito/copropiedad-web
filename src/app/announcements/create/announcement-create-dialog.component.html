@@ -1,0 +1,132 @@
+<h2 mat-dialog-title>
+  <mat-icon class="dialog-icon">campaign</mat-icon>
+  Nuevo Anuncio
+</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" (ngSubmit)="submit()" id="ann-form">
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Título</mat-label>
+      <input matInput formControlName="title" maxlength="160" />
+      <mat-hint align="end">{{ form.controls.title.value.length }}/160</mat-hint>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Mensaje</mat-label>
+      <textarea matInput formControlName="body" rows="5" cdkTextareaAutosize></textarea>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Alcance</mat-label>
+      <mat-select formControlName="scope" (selectionChange)="onScopeChange()">
+        @for (opt of scopeOptions; track opt.value) {
+          <mat-option [value]="opt.value">
+            <mat-icon class="scope-opt-icon">{{ opt.icon }}</mat-icon>
+            {{ opt.label }}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Torre selector (for TOWER, FLOOR, UNIT scopes) -->
+    @if (currentScope === 'TOWER' || currentScope === 'FLOOR' || currentScope === 'UNIT') {
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Torre</mat-label>
+        <mat-select [value]="selectedTorre" (selectionChange)="onTorreChange($event.value)">
+          @for (g of torreGroups(); track g.name) {
+            <mat-option [value]="g.name">{{ g.name }}</mat-option>
+          }
+        </mat-select>
+        <mat-icon matPrefix>domain</mat-icon>
+      </mat-form-field>
+    }
+
+    <!-- Interior selector (for TOWER scope when torre has multiple interiors) -->
+    @if (currentScope === 'TOWER' && selectedTorre && interiorsForTorre().length > 0) {
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Interior</mat-label>
+        <mat-select [value]="selectedTowerId" (selectionChange)="selectedTowerId = $event.value">
+          @for (t of interiorsForTorre(); track t.id) {
+            <mat-option [value]="t.id">{{ t.name }}</mat-option>
+          }
+        </mat-select>
+        <mat-icon matPrefix>meeting_room</mat-icon>
+      </mat-form-field>
+    }
+
+    <!-- Interior + Floor selector (for FLOOR scope) -->
+    @if (currentScope === 'FLOOR' && selectedTorre && interiorsForTorre().length > 0) {
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Interior</mat-label>
+        <mat-select [value]="selectedTowerId" (selectionChange)="onInteriorChange($event.value)">
+          @for (t of interiorsForTorre(); track t.id) {
+            <mat-option [value]="t.id">{{ t.name }}</mat-option>
+          }
+        </mat-select>
+        <mat-icon matPrefix>meeting_room</mat-icon>
+      </mat-form-field>
+
+      @if (selectedTowerId && floorOptions().length > 0) {
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Piso</mat-label>
+          <mat-select [value]="selectedFloor" (selectionChange)="selectedFloor = $event.value">
+            @for (f of floorOptions(); track f) {
+              <mat-option [value]="'' + f">Piso {{ f }}</mat-option>
+            }
+          </mat-select>
+          <mat-icon matPrefix>layers</mat-icon>
+        </mat-form-field>
+      }
+    }
+
+    <!-- Interior + Unit selector (for UNIT scope) -->
+    @if (currentScope === 'UNIT' && selectedTorre && interiorsForTorre().length > 0) {
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Interior</mat-label>
+        <mat-select [value]="selectedTowerId" (selectionChange)="onInteriorChange($event.value)">
+          @for (t of interiorsForTorre(); track t.id) {
+            <mat-option [value]="t.id">{{ t.name }}</mat-option>
+          }
+        </mat-select>
+        <mat-icon matPrefix>meeting_room</mat-icon>
+      </mat-form-field>
+
+      @if (selectedTowerId && filteredUnits().length > 0) {
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Apartamento</mat-label>
+          <mat-select [value]="selectedUnitId" (selectionChange)="selectedUnitId = $event.value">
+            @for (u of filteredUnits(); track u.id) {
+              <mat-option [value]="u.id">Apto {{ u.number }}</mat-option>
+            }
+          </mat-select>
+          <mat-icon matPrefix>door_front</mat-icon>
+        </mat-form-field>
+      }
+    }
+
+    <mat-slide-toggle formControlName="sendPush" color="primary">
+      Enviar notificación push
+    </mat-slide-toggle>
+
+    @if (errorMsg) {
+      <div class="error-msg">
+        <mat-icon color="warn" inline>error</mat-icon>
+        {{ errorMsg }}
+      </div>
+    }
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close type="button" [disabled]="saving">Cancelar</button>
+  <button mat-flat-button color="primary" type="submit" form="ann-form"
+    [disabled]="saving || form.invalid || !scopeValueValid">
+    @if (saving) {
+      <mat-progress-spinner mode="indeterminate" diameter="20" />
+    } @else {
+      <mat-icon>send</mat-icon>
+      Publicar
+    }
+  </button>
+</mat-dialog-actions>

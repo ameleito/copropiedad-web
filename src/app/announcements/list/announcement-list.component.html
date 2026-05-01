@@ -1,0 +1,99 @@
+<div class="ann-list-page">
+  <header class="page-header">
+    <div class="title-row">
+      <h1 class="page-title" matBadge="{{ totalElements() }}" matBadgeOverlap="false" [matBadgeHidden]="totalElements() === 0">
+        <mat-icon aria-hidden="true" class="title-icon">campaign</mat-icon>
+        Anuncios
+      </h1>
+    </div>
+
+    @if (!isAdmin()) {
+      <mat-chip-set class="filter-chips" aria-label="Filtrar por lectura">
+        @for (chip of filterChips; track chip.value) {
+          <mat-chip
+            [highlighted]="chipActive(chip.value)"
+            (click)="setFilter(chip.value)"
+            tabindex="0"
+            role="button">
+            {{ chip.label }}
+          </mat-chip>
+        }
+      </mat-chip-set>
+    }
+  </header>
+
+  @if (loadError()) {
+    <mat-card class="error-banner" appearance="outlined">
+      <mat-card-content>
+        <mat-icon color="warn">error_outline</mat-icon>
+        <span>{{ loadError() }}</span>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  @if (loading()) {
+    <div class="loading-wrap">
+      <mat-progress-spinner mode="indeterminate" diameter="48" />
+      <span>Cargando anuncios…</span>
+    </div>
+  } @else if (!filteredItems().length) {
+    <div class="empty-state">
+      <mat-icon class="empty-icon">notifications_none</mat-icon>
+      <p class="empty-title">No hay anuncios</p>
+      <p class="empty-hint">Cuando se publiquen anuncios, aparecerán aquí.</p>
+    </div>
+  } @else {
+    <div class="card-list">
+      @for (a of filteredItems(); track a.id) {
+        <mat-card
+          class="ann-card"
+          [class.unread]="!a.read && !isAdmin()"
+          appearance="outlined"
+          (click)="openDetail(a)">
+          <mat-card-header>
+            <div mat-card-avatar class="ann-avatar">
+              <mat-icon>{{ scopeIcons[a.scope] }}</mat-icon>
+            </div>
+            <mat-card-title class="ann-title">
+              @if (!a.read && !isAdmin()) {
+                <span class="unread-dot"></span>
+              }
+              {{ a.title }}
+            </mat-card-title>
+            <mat-card-subtitle>
+              {{ a.createdByName }} · {{ timeAgo(a.createdAt) }}
+              · <mat-icon class="scope-icon-inline">{{ scopeIcons[a.scope] }}</mat-icon> {{ scopeLabels[a.scope] }}
+            </mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content>
+            <p class="ann-body-preview">{{ a.body }}</p>
+          </mat-card-content>
+
+          @if (isAdmin()) {
+            <mat-card-actions align="end">
+              <button mat-icon-button color="warn" (click)="deleteAnnouncement(a, $event)" aria-label="Eliminar anuncio">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </mat-card-actions>
+          }
+        </mat-card>
+      }
+    </div>
+  }
+
+  <mat-paginator
+    class="paginator"
+    [length]="totalElements()"
+    [pageIndex]="pageIndex()"
+    [pageSize]="pageSize()"
+    [pageSizeOptions]="[10, 20, 50]"
+    showFirstLastButtons
+    (page)="onPage($event)" />
+</div>
+
+@if (isAdmin()) {
+  <button mat-fab class="fab-create" color="primary" (click)="openCreate()" aria-label="Crear anuncio">
+    <mat-icon>add</mat-icon>
+  </button>
+}

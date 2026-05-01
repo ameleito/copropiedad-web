@@ -1,0 +1,76 @@
+.page-container {
+  max-width: 800px;
+  margin: 24px auto;
+  padding: 0 16px;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+
+  h2 {
+    margin: 0;
+  }
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  padding: 64px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 64px 16px;
+  color: rgba(0, 0, 0, 0.54);
+
+  .empty-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    opacity: 0.3;
+  }
+
+  p {
+    font-size: 16px;
+  }
+}
+
+.notif-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.notif-card {
+  cursor: pointer;
+  border-left: 4px solid transparent;
+  transition: all 0.2s;
+
+  &.unread {
+    border-left-color: #1976d2;
+    background-color: rgba(33, 150, 243, 0.04);
+  }
+
+  &:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  }
+}
+
+.notif-icon {
+  color: #1976d2;
+  background: rgba(33, 150, 243, 0.1);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notif-title {
+  font-weight: 500;
+}

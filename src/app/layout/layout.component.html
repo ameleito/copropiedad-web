@@ -1,0 +1,14 @@
+<app-navbar (menuToggle)="toggleSidenav()"></app-navbar>
+
+<mat-sidenav-container class="sidenav-container">
+  <mat-sidenav #sidenav mode="over" position="start" class="app-sidenav"
+               (click)="closeSidenav()">
+    <app-sidenav-menu></app-sidenav-menu>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="content-area">
+    <main class="content">
+      <router-outlet></router-outlet>
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>

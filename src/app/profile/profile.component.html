@@ -1,0 +1,57 @@
+<section class="profile">
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>Mi perfil</mat-card-title>
+      <mat-card-subtitle>Actualiza tu información de contacto y preferencias.</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      @if (loading()) {
+        <p class="muted">Cargando…</p>
+      }
+
+      @if (loadError()) {
+        <div class="banner error" role="alert">{{ loadError() }}</div>
+      }
+
+      @if (saveSuccess()) {
+        <div class="banner success" role="status">Cambios guardados correctamente.</div>
+      }
+
+      @if (saveError()) {
+        <div class="banner error" role="alert">{{ saveError() }}</div>
+      }
+
+      <form class="profile-form" [formGroup]="form" (ngSubmit)="save()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nombre completo</mat-label>
+          <input matInput type="text" formControlName="fullName" autocomplete="name" />
+          @if (form.controls.fullName.hasError('required') && form.controls.fullName.touched) {
+            <mat-error>Este campo es obligatorio</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Teléfono</mat-label>
+          <input matInput type="tel" formControlName="phone" autocomplete="tel" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Documento de identidad</mat-label>
+          <input matInput type="text" formControlName="idDocument" autocomplete="off" />
+        </mat-form-field>
+
+        <div class="toggles">
+          <mat-slide-toggle formControlName="whatsappOptIn">Notificaciones por WhatsApp</mat-slide-toggle>
+          <mat-slide-toggle formControlName="pushOptIn">Notificaciones push</mat-slide-toggle>
+        </div>
+
+        <div class="actions">
+          <button mat-flat-button color="primary" type="submit" [disabled]="saving() || loading()">
+            Guardar Cambios
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</section>

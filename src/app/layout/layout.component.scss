@@ -1,0 +1,17 @@
+.sidenav-container {
+  height: calc(100vh - 64px);
+}
+
+.app-sidenav {
+  width: 280px;
+}
+
+.content-area {
+  overflow-y: auto;
+}
+
+.content {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}

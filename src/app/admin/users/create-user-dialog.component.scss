@@ -1,0 +1,35 @@
+.dialog-form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 380px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.row-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.section-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.55);
+  margin: 4px 0 0;
+}
+
+.error-banner {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(244, 67, 54, 0.1);
+  color: #b71c1c;
+  margin-bottom: 12px;
+  font-size: 0.875rem;
+}

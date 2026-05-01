@@ -1,0 +1,157 @@
+<div class="vis-list-page">
+  <header class="page-header">
+    <div class="title-row">
+      <h1 class="page-title" matBadge="{{ totalElements() }}" matBadgeOverlap="false" [matBadgeHidden]="totalElements() === 0">
+        <mat-icon aria-hidden="true" class="title-icon">groups</mat-icon>
+        Visitantes
+      </h1>
+    </div>
+
+    <mat-chip-set class="filter-chips" aria-label="Filtrar por estado">
+      @for (chip of filterChips; track chip.value) {
+        <mat-chip
+          [highlighted]="chipActive(chip.value)"
+          (click)="setFilter(chip.value)"
+          tabindex="0"
+          role="button">
+          {{ chip.label }}
+        </mat-chip>
+      }
+    </mat-chip-set>
+  </header>
+
+  @if (loadError()) {
+    <mat-card class="error-banner" appearance="outlined">
+      <mat-card-content>
+        <mat-icon color="warn">error_outline</mat-icon>
+        <span>{{ loadError() }}</span>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  @if (loading()) {
+    <div class="loading-wrap">
+      <mat-progress-spinner mode="indeterminate" diameter="48" />
+      <span>Cargando visitantes…</span>
+    </div>
+  } @else if (!items().length) {
+    <div class="empty-state">
+      <mat-icon class="empty-icon">person_off</mat-icon>
+      <p class="empty-title">No hay visitantes</p>
+      <p class="empty-hint">Cuando se registren visitantes, aparecerán aquí.</p>
+    </div>
+  } @else {
+    <div class="card-grid">
+      @for (v of items(); track v.id) {
+        <mat-card
+          class="vis-card"
+          [style.border-left-color]="colors[v.status]"
+          appearance="outlined">
+          <mat-card-header>
+            <div mat-card-avatar class="vis-avatar">
+              <mat-icon>{{ icons[v.status] }}</mat-icon>
+            </div>
+            <mat-card-title>{{ v.fullName }}</mat-card-title>
+            <mat-card-subtitle>Apto {{ v.unitNumber }} · {{ v.towerName ?? '' }}</mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content>
+            <div class="meta-row">
+              <mat-chip-set>
+                <mat-chip [ngStyle]="statusChipStyle(v.status)">
+                  {{ labels[v.status] }}
+                </mat-chip>
+              </mat-chip-set>
+              @if (v.preregistered) {
+                <span class="prereg-badge">Pre-registrado</span>
+              }
+            </div>
+
+            @if (v.idDocument) {
+              <div class="info-row">
+                <mat-icon inline>badge</mat-icon>
+                <span>{{ v.idDocument }}</span>
+              </div>
+            }
+
+            @if (v.expectedAt) {
+              <div class="info-row">
+                <mat-icon inline>event</mat-icon>
+                <span>Esperado: {{ v.expectedAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+            }
+
+            @if (v.entryTime) {
+              <div class="info-row">
+                <mat-icon inline>login</mat-icon>
+                <span>Entrada: {{ v.entryTime | date: 'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+            }
+
+            @if (v.exitTime) {
+              <div class="info-row">
+                <mat-icon inline>logout</mat-icon>
+                <span>Salida: {{ v.exitTime | date: 'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+            }
+
+            @if (v.notes) {
+              <div class="info-row">
+                <mat-icon inline>notes</mat-icon>
+                <span>{{ v.notes }}</span>
+              </div>
+            }
+
+            @if (v.preregisteredByName) {
+              <div class="info-row">
+                <mat-icon inline>person_outline</mat-icon>
+                <span>Registró: {{ v.preregisteredByName }}</span>
+              </div>
+            }
+
+            @if (v.loggedByName) {
+              <div class="info-row">
+                <mat-icon inline>security</mat-icon>
+                <span>Portería: {{ v.loggedByName }}</span>
+              </div>
+            }
+          </mat-card-content>
+
+          @if (isSecurity()) {
+            <mat-card-actions align="end">
+              @if (v.status === 'ESPERADO') {
+                <button mat-stroked-button color="primary" (click)="checkIn(v, $event)">
+                  <mat-icon>login</mat-icon>
+                  Ingreso
+                </button>
+                <button mat-stroked-button (click)="markNoShow(v, $event)">
+                  <mat-icon>person_off</mat-icon>
+                  No vino
+                </button>
+              }
+              @if (v.status === 'INGRESADO') {
+                <button mat-flat-button color="primary" (click)="checkOut(v, $event)">
+                  <mat-icon>logout</mat-icon>
+                  Salida
+                </button>
+              }
+            </mat-card-actions>
+          }
+        </mat-card>
+      }
+    </div>
+  }
+
+  <mat-paginator
+    class="paginator"
+    [length]="totalElements()"
+    [pageIndex]="pageIndex()"
+    [pageSize]="pageSize()"
+    [pageSizeOptions]="[10, 20, 50]"
+    showFirstLastButtons
+    (page)="onPage($event)" />
+</div>
+
+<button mat-fab class="fab-create" color="primary" (click)="openRegister()" aria-label="Registrar visitante">
+  <mat-icon>person_add</mat-icon>
+</button>

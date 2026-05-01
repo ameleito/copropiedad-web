@@ -1,0 +1,56 @@
+<h2 mat-dialog-title>
+  <mat-icon class="dialog-icon">add_alert</mat-icon>
+  Reportar Incidente
+</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" (ngSubmit)="submit()" id="incident-create-form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Título</mat-label>
+      <input matInput formControlName="title" autocomplete="off" />
+      @if (form.controls.title.touched && form.controls.title.hasError('required')) {
+        <mat-error>El título es obligatorio</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Descripción</mat-label>
+      <textarea matInput formControlName="description" rows="4"></textarea>
+      @if (form.controls.description.touched && form.controls.description.hasError('required')) {
+        <mat-error>La descripción es obligatoria</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Ubicación (opcional)</mat-label>
+      <input matInput formControlName="location" autocomplete="off" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Severidad</mat-label>
+      <mat-select formControlName="severity">
+        @for (opt of severityOptions; track opt.value) {
+          <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    @if (errorMessage()) {
+      <p class="error-msg">
+        <mat-icon inline color="warn">error</mat-icon>
+        {{ errorMessage() }}
+      </p>
+    }
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()" [disabled]="submitting()">Cancelar</button>
+  <button mat-flat-button color="primary" type="submit" form="incident-create-form" [disabled]="submitting()">
+    @if (submitting()) {
+      <mat-progress-spinner diameter="20" mode="indeterminate" />
+    } @else {
+      Guardar
+    }
+  </button>
+</mat-dialog-actions>

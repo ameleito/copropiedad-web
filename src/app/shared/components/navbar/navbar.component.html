@@ -1,0 +1,54 @@
+<mat-toolbar color="primary" class="navbar">
+  <button mat-icon-button type="button" aria-label="Abrir menú" (click)="menuToggle.emit()">
+    <mat-icon>menu</mat-icon>
+  </button>
+
+  <a class="brand" mat-button routerLink="/dashboard">
+    <span class="brand-text">Copropiedad</span>
+  </a>
+
+  <span class="spacer"></span>
+
+  <div class="user-area">
+    <button
+      mat-icon-button
+      type="button"
+      [matMenuTriggerFor]="notifMenu"
+      aria-label="Notificaciones"
+      class="notif-bell">
+      <mat-icon
+        [matBadge]="notifService.unreadCount()"
+        [matBadgeHidden]="!notifService.hasUnread()"
+        matBadgeColor="warn"
+        matBadgeSize="small">
+        notifications
+      </mat-icon>
+    </button>
+
+    <mat-menu #notifMenu="matMenu" class="notif-menu-panel">
+      <div (click)="$event.stopPropagation()">
+        <app-notification-panel></app-notification-panel>
+      </div>
+    </mat-menu>
+
+    <div class="user-meta">
+      <div class="user-name">{{ auth.displayName() }}</div>
+      <div class="user-role">{{ auth.roleLabel() }}</div>
+    </div>
+
+    <button mat-icon-button type="button" [matMenuTriggerFor]="userMenu" aria-label="Menú de usuario">
+      <mat-icon>account_circle</mat-icon>
+    </button>
+
+    <mat-menu #userMenu="matMenu">
+      <button mat-menu-item type="button" (click)="goProfile()">
+        <mat-icon>person</mat-icon>
+        <span>Mi Perfil</span>
+      </button>
+      <button mat-menu-item type="button" (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        <span>Cerrar Sesión</span>
+      </button>
+    </mat-menu>
+  </div>
+</mat-toolbar>

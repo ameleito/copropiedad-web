@@ -1,0 +1,59 @@
+<h2 mat-dialog-title class="title-row">
+  <span>Chat</span>
+  <button mat-icon-button type="button" class="close-btn" (click)="close()" aria-label="Cerrar">
+    <mat-icon>close</mat-icon>
+  </button>
+</h2>
+
+<mat-dialog-content class="chat-body">
+  @if (loading()) {
+    <div class="loading-wrap">
+      <mat-spinner diameter="36"></mat-spinner>
+      <span>Cargando mensajes…</span>
+    </div>
+  } @else if (loadError() && messages().length === 0) {
+    <p class="warn-text">{{ loadError() }}</p>
+  } @else {
+    <div class="messages-viewport" #viewport>
+      @for (msg of messages(); track msg.id) {
+        <div class="bubble-row" [class.own]="isOwn(msg)">
+          <div class="bubble" [class.own-bubble]="isOwn(msg)" [class.other-bubble]="!isOwn(msg)">
+            <div class="bubble-meta">
+              <span class="sender">{{ msg.senderName }}</span>
+              <span class="time">{{ formatTime(msg.sentAt) }}</span>
+            </div>
+            <div class="bubble-text">{{ msg.body }}</div>
+            @if (msg.attachmentUrl) {
+              <a class="attachment" [href]="msg.attachmentUrl" target="_blank" rel="noopener">Adjunto</a>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (loadError() && messages().length > 0) {
+    <p class="inline-warn">{{ loadError() }}</p>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions class="composer" align="start">
+  <form [formGroup]="form" class="composer-form" (ngSubmit)="send()">
+    <mat-form-field appearance="outline" class="composer-field" subscriptSizing="dynamic">
+      <mat-label>Escriba un mensaje</mat-label>
+      <textarea matInput formControlName="body" rows="2" (keydown.control.enter)="send()"></textarea>
+    </mat-form-field>
+    <button
+      mat-fab
+      color="primary"
+      type="submit"
+      class="send-btn"
+      [disabled]="sending() || form.controls.body.invalid || !form.controls.body.value.trim()">
+      @if (sending()) {
+        <mat-spinner diameter="24"></mat-spinner>
+      } @else {
+        <mat-icon>send</mat-icon>
+      }
+    </button>
+  </form>
+</mat-dialog-actions>

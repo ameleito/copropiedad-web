@@ -1,0 +1,54 @@
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+}
+
+.brand-text {
+  font-weight: 600;
+  font-size: 1.15rem;
+  letter-spacing: 0.3px;
+}
+
+.user-area {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-meta {
+  display: none;
+  text-align: right;
+  line-height: 1.1;
+}
+
+@media (min-width: 720px) {
+  .user-meta {
+    display: block;
+  }
+}
+
+.user-name {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.user-role {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.notif-bell {
+  color: inherit;
+}

@@ -1,0 +1,140 @@
+<div class="pkg-list-page">
+  <header class="page-header">
+    <div class="title-row">
+      <h1 class="page-title" matBadge="{{ totalElements() }}" matBadgeOverlap="false" [matBadgeHidden]="totalElements() === 0">
+        <mat-icon aria-hidden="true" class="title-icon">inventory_2</mat-icon>
+        Paquetes
+      </h1>
+    </div>
+
+    <mat-chip-set class="filter-chips" aria-label="Filtrar por estado">
+      @for (chip of filterChips; track chip.value) {
+        <mat-chip
+          [highlighted]="chipActive(chip.value)"
+          (click)="setFilter(chip.value)"
+          tabindex="0"
+          role="button">
+          {{ chip.label }}
+        </mat-chip>
+      }
+    </mat-chip-set>
+  </header>
+
+  @if (loadError()) {
+    <mat-card class="error-banner" appearance="outlined">
+      <mat-card-content>
+        <mat-icon color="warn">error_outline</mat-icon>
+        <span>{{ loadError() }}</span>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  @if (loading()) {
+    <div class="loading-wrap">
+      <mat-progress-spinner mode="indeterminate" diameter="48" />
+      <span>Cargando paquetes…</span>
+    </div>
+  } @else if (!items().length) {
+    <div class="empty-state">
+      <mat-icon class="empty-icon">markunread_mailbox</mat-icon>
+      <p class="empty-title">No hay paquetes</p>
+      <p class="empty-hint">Cuando se registren paquetes, aparecerán aquí.</p>
+    </div>
+  } @else {
+    <div class="card-grid">
+      @for (pkg of items(); track pkg.id) {
+        <mat-card
+          class="pkg-card"
+          [style.border-left-color]="colors[pkg.status]"
+          appearance="outlined"
+          tabindex="0">
+          <mat-card-header>
+            <div mat-card-avatar class="pkg-avatar">
+              <mat-icon>{{ icons[pkg.status] }}</mat-icon>
+            </div>
+            <mat-card-title>Apto {{ pkg.unitNumber }}</mat-card-title>
+            <mat-card-subtitle>{{ pkg.towerName ?? 'Sin torre' }}</mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content>
+            <div class="meta-row">
+              <mat-chip-set>
+                <mat-chip [ngStyle]="statusChipStyle(pkg.status)">
+                  {{ labels[pkg.status] }}
+                </mat-chip>
+              </mat-chip-set>
+            </div>
+
+            @if (pkg.courier) {
+              <div class="info-row">
+                <mat-icon inline>local_shipping</mat-icon>
+                <span>{{ pkg.courier }}</span>
+              </div>
+            }
+
+            @if (pkg.recipientName) {
+              <div class="info-row">
+                <mat-icon inline>person</mat-icon>
+                <span>{{ pkg.recipientName }}</span>
+              </div>
+            }
+
+            @if (pkg.description) {
+              <div class="info-row">
+                <mat-icon inline>notes</mat-icon>
+                <span>{{ pkg.description }}</span>
+              </div>
+            }
+
+            <div class="info-row">
+              <mat-icon inline>schedule</mat-icon>
+              <span>Recibido: {{ pkg.receivedAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+
+            <div class="info-row">
+              <mat-icon inline>person_outline</mat-icon>
+              <span>Recibió: {{ pkg.receivedByName }}</span>
+            </div>
+
+            @if (pkg.deliveredToName) {
+              <div class="info-row">
+                <mat-icon inline>how_to_reg</mat-icon>
+                <span>Entregado a: {{ pkg.deliveredToName }} — {{ pkg.deliveredAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+            }
+          </mat-card-content>
+
+          @if (canManage() && pkg.status !== 'ENTREGADO') {
+            <mat-card-actions align="end">
+              @if (pkg.status === 'RECIBIDO') {
+                <button mat-stroked-button color="primary" (click)="notifyResident(pkg, $event)">
+                  <mat-icon>notifications</mat-icon>
+                  Notificar
+                </button>
+              }
+              <button mat-flat-button color="primary" (click)="openDeliver(pkg, $event)">
+                <mat-icon>check</mat-icon>
+                Entregar
+              </button>
+            </mat-card-actions>
+          }
+        </mat-card>
+      }
+    </div>
+  }
+
+  <mat-paginator
+    class="paginator"
+    [length]="totalElements()"
+    [pageIndex]="pageIndex()"
+    [pageSize]="pageSize()"
+    [pageSizeOptions]="[10, 20, 50]"
+    showFirstLastButtons
+    (page)="onPage($event)" />
+</div>
+
+@if (canReceive()) {
+  <button mat-fab class="fab-create" color="primary" (click)="openReceive()" aria-label="Registrar paquete">
+    <mat-icon>add</mat-icon>
+  </button>
+}

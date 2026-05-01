@@ -1,0 +1,131 @@
+<h2 mat-dialog-title class="detail-title">
+  <mat-icon class="dialog-icon">receipt</mat-icon>
+  Factura · {{ formatPeriod(data.period) }}
+</h2>
+
+<mat-dialog-content>
+  <div class="detail-grid">
+    <div class="detail-item">
+      <span class="label">Unidad</span>
+      <span class="value">Apto {{ data.unitNumber }} · {{ data.towerName ?? '' }}</span>
+    </div>
+    <div class="detail-item">
+      <span class="label">Estado</span>
+      <mat-chip-set>
+        <mat-chip [ngStyle]="{ 'background-color': statusColors[data.status], 'color': '#fff' }">
+          {{ statusLabels[data.status] }}
+        </mat-chip>
+      </mat-chip-set>
+    </div>
+    @if (data.feeTypeName) {
+      <div class="detail-item">
+        <span class="label">Tipo de cobro</span>
+        <span class="value">{{ data.feeTypeName }}</span>
+      </div>
+    }
+    <div class="detail-item">
+      <span class="label">Monto</span>
+      <span class="value money">{{ data.amount | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</span>
+    </div>
+    @if (data.lateFee > 0) {
+      <div class="detail-item">
+        <span class="label">Mora</span>
+        <span class="value money late">{{ data.lateFee | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</span>
+      </div>
+    }
+    <div class="detail-item">
+      <span class="label">Total</span>
+      <span class="value money total">{{ data.totalAmount | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</span>
+    </div>
+    <div class="detail-item">
+      <span class="label">Vencimiento</span>
+      <span class="value">{{ data.dueDate | date: 'dd/MM/yyyy' }}</span>
+    </div>
+    @if (data.paidAt) {
+      <div class="detail-item">
+        <span class="label">Pagada</span>
+        <span class="value">{{ data.paidAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+    }
+    @if (data.notes) {
+      <div class="detail-item full">
+        <span class="label">Notas</span>
+        <span class="value">{{ data.notes }}</span>
+      </div>
+    }
+  </div>
+
+  <!-- Payments history -->
+  @if (payments().length > 0) {
+    <h3 class="section-title">Historial de pagos</h3>
+    @for (p of payments(); track p.id) {
+      <div class="payment-item">
+        <mat-icon class="pay-icon" [class.approved]="p.status === 'APROBADO'">
+          {{ p.status === 'APROBADO' ? 'check_circle' : 'pending' }}
+        </mat-icon>
+        <div class="pay-info">
+          <span class="pay-amount">{{ p.amount | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</span>
+          <span class="pay-method">{{ methodLabels[p.method] }}</span>
+          @if (p.providerRef) {
+            <span class="pay-ref">Ref: {{ p.providerRef }}</span>
+          }
+        </div>
+        <span class="pay-date">{{ p.createdAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+    }
+  }
+
+  <!-- Payment form -->
+  @if (canPay && !showPayForm()) {
+    <button mat-stroked-button color="primary" class="pay-btn" (click)="showPayForm.set(true)">
+      <mat-icon>payment</mat-icon>
+      Registrar Pago
+    </button>
+  }
+
+  @if (canPay && showPayForm()) {
+    <h3 class="section-title">Registrar Pago</h3>
+    <form [formGroup]="payForm" (ngSubmit)="submitPayment()" class="pay-form">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Monto ($)</mat-label>
+        <input matInput type="number" formControlName="amount" />
+        <mat-icon matPrefix>attach_money</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Método de pago</mat-label>
+        <mat-select formControlName="method">
+          @for (m of paymentMethods; track m.value) {
+            <mat-option [value]="m.value">{{ m.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Referencia (opcional)</mat-label>
+        <input matInput formControlName="providerRef" />
+      </mat-form-field>
+
+      <div class="pay-actions">
+        <button mat-button type="button" (click)="showPayForm.set(false)">Cancelar</button>
+        <button mat-flat-button color="primary" type="submit" [disabled]="paySubmitting || payForm.invalid">
+          @if (paySubmitting) {
+            <mat-progress-spinner mode="indeterminate" diameter="20" />
+          } @else {
+            Confirmar Pago
+          }
+        </button>
+      </div>
+    </form>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  @if (isAdmin && canPay) {
+    <button mat-button color="warn" (click)="cancelInvoice()">
+      <mat-icon>cancel</mat-icon>
+      Anular
+    </button>
+  }
+  <button mat-flat-button color="primary" (click)="close()">Cerrar</button>
+</mat-dialog-actions>

@@ -1,0 +1,56 @@
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.welcome {
+  h1 {
+    margin: 0 0 6px;
+    font-size: 28px;
+    font-weight: 600;
+  }
+}
+
+.subtitle {
+  margin: 0;
+  opacity: 0.75;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.feature-card {
+  height: 100%;
+  cursor: default;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(63, 81, 181, 0.55);
+    outline-offset: 2px;
+  }
+}
+
+.feature-avatar {
+  display: grid;
+  place-items: center;
+  background: rgba(63, 81, 181, 0.12);
+  border-radius: 12px;
+
+  mat-icon {
+    color: #3f51b5;
+  }
+}
+
+.feature-card p {
+  margin: 0;
+  opacity: 0.85;
+}

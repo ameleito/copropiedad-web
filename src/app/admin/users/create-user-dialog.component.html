@@ -1,0 +1,108 @@
+<h2 mat-dialog-title>Crear nuevo usuario</h2>
+
+<mat-dialog-content>
+  @if (errorMessage) {
+    <div class="error-banner" role="alert">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ errorMessage }}</span>
+    </div>
+  }
+
+  <form [formGroup]="form" class="dialog-form" (ngSubmit)="submit()">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Nombre completo</mat-label>
+      <input matInput formControlName="fullName" />
+      <mat-icon matPrefix>badge</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Correo electrónico</mat-label>
+      <input matInput type="email" formControlName="email" />
+      <mat-icon matPrefix>mail</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Contraseña</mat-label>
+      <input matInput type="password" formControlName="password" />
+      <mat-icon matPrefix>lock</mat-icon>
+      @if (form.controls.password.hasError('minlength') && form.controls.password.touched) {
+        <mat-error>Mínimo 8 caracteres</mat-error>
+      }
+    </mat-form-field>
+
+    <div class="row-2col">
+      <mat-form-field appearance="outline">
+        <mat-label>Teléfono</mat-label>
+        <input matInput formControlName="phone" />
+        <mat-icon matPrefix>phone</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Documento</mat-label>
+        <input matInput formControlName="idDocument" />
+        <mat-icon matPrefix>assignment_ind</mat-icon>
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Rol</mat-label>
+      <mat-select formControlName="role">
+        @for (r of roles; track r.value) {
+          <mat-option [value]="r.value">{{ r.label }}</mat-option>
+        }
+      </mat-select>
+      <mat-icon matPrefix>admin_panel_settings</mat-icon>
+    </mat-form-field>
+
+    <h4 class="section-label">Unidad (opcional)</h4>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Torre</mat-label>
+      <mat-select (selectionChange)="onTorreChange($event.value)">
+        @for (g of torreGroups(); track g.name) {
+          <mat-option [value]="g.name">{{ g.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    @if (selectedTorre()) {
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Interior</mat-label>
+        <mat-select (selectionChange)="onInteriorChange($event.value)">
+          @for (int of interiorsForTorre(); track int.id) {
+            <mat-option [value]="int.id">{{ int.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    }
+
+    @if (selectedTowerId()) {
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Apartamento</mat-label>
+        <mat-select formControlName="unitId">
+          @for (unit of filteredUnits(); track unit.id) {
+            <mat-option [value]="unit.id">
+              Apto {{ unit.number }} (Piso {{ unit.floor }})
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    }
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()">Cancelar</button>
+  <button
+    mat-flat-button
+    color="primary"
+    type="button"
+    [disabled]="submitting"
+    (click)="submit()">
+    @if (submitting) {
+      <mat-progress-spinner diameter="18" mode="indeterminate" />
+    } @else {
+      Crear Usuario
+    }
+  </button>
+</mat-dialog-actions>

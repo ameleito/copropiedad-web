@@ -1,0 +1,62 @@
+<h2 mat-dialog-title>Nueva conversación</h2>
+
+<mat-dialog-content class="dialog-body">
+  @if (usersLoading()) {
+    <div class="loading-row">
+      <mat-spinner diameter="32"></mat-spinner>
+      <span>Cargando participantes…</span>
+    </div>
+  } @else if (loadUsersError()) {
+    <p class="warn-text">{{ loadUsersError() }}</p>
+  }
+
+  <form [formGroup]="form" class="form-grid">
+    <mat-form-field appearance="outline">
+      <mat-label>Asunto</mat-label>
+      <input matInput formControlName="subject" autocomplete="off" />
+      @if (form.controls.subject.hasError('required') && form.controls.subject.touched) {
+        <mat-error>El asunto es obligatorio</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Participantes</mat-label>
+      <mat-select formControlName="participantIds" multiple>
+        @for (u of participantOptions(); track u.id) {
+          <mat-option [value]="u.id">
+            {{ u.fullName }}
+            @if (u.role === 'ADMIN') {
+              <span class="role-tag">(Admin)</span>
+            }
+          </mat-option>
+        }
+      </mat-select>
+      @if (form.controls.participantIds.hasError('participants') && form.controls.participantIds.touched) {
+        <mat-error>Seleccione al menos un participante</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Primer mensaje</mat-label>
+      <textarea matInput formControlName="firstMessage" rows="4"></textarea>
+      @if (form.controls.firstMessage.hasError('required') && form.controls.firstMessage.touched) {
+        <mat-error>Escriba un mensaje</mat-error>
+      }
+    </mat-form-field>
+
+    @if (errorMsg) {
+      <p class="warn-text">{{ errorMsg }}</p>
+    }
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()" [disabled]="saving">Cancelar</button>
+  <button mat-flat-button color="primary" type="button" (click)="submit()" [disabled]="saving || usersLoading()">
+    @if (saving) {
+      <mat-spinner diameter="20"></mat-spinner>
+    } @else {
+      Crear
+    }
+  </button>
+</mat-dialog-actions>

@@ -1,0 +1,42 @@
+<h2 mat-dialog-title>Entregar paquete</h2>
+
+<mat-dialog-content>
+  @if (errorMessage) {
+    <div class="error-banner" role="alert">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ errorMessage }}</span>
+    </div>
+  }
+
+  <form [formGroup]="form" class="dialog-form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Entregar a</mat-label>
+      <mat-select formControlName="deliveredToUserId">
+        @for (r of unitResidents(); track r.id) {
+          <mat-option [value]="r.id">{{ r.fullName }} ({{ r.email }})</mat-option>
+        }
+      </mat-select>
+      <mat-icon matPrefix>person</mat-icon>
+    </mat-form-field>
+
+    @if (!unitResidents().length) {
+      <p class="warn-text">No se encontraron residentes para esta unidad.</p>
+    }
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()">Cancelar</button>
+  <button
+    mat-flat-button
+    color="primary"
+    type="button"
+    [disabled]="submitting || !unitResidents().length"
+    (click)="submit()">
+    @if (submitting) {
+      <mat-progress-spinner diameter="18" mode="indeterminate" />
+    } @else {
+      Confirmar entrega
+    }
+  </button>
+</mat-dialog-actions>

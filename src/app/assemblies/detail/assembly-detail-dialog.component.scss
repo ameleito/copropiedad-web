@@ -1,0 +1,504 @@
+.dialog-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-right: 0;
+}
+
+.title-text {
+  flex: 1;
+  min-width: 0;
+  font-size: 1.15rem;
+  line-height: 1.3;
+}
+
+.detail-body {
+  max-height: min(70vh, 640px);
+  padding-top: 0.25rem;
+}
+
+.loading-inline {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem 0;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.header-section {
+  margin-bottom: 1rem;
+}
+
+.header-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.type-pill {
+  font-size: 0.85rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.header-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+
+  span,
+  .virtual-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  mat-icon {
+    font-size: 1.1rem;
+    width: 1.1rem;
+    height: 1.1rem;
+    opacity: 0.85;
+  }
+}
+
+.virtual-link {
+  color: var(--mat-sys-primary);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.quorum-row {
+  font-size: 0.9rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.byline {
+  margin: 0.5rem 0 0;
+  font-size: 0.8rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.attendee-row {
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  button mat-icon {
+    margin-right: 0.25rem;
+  }
+}
+
+.section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem;
+}
+
+.admin-status {
+  padding: 1rem 0;
+}
+
+.status-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.status-field {
+  min-width: 200px;
+}
+
+.agenda-section {
+  padding: 1rem 0 0;
+}
+
+.agenda-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.add-card {
+  margin-bottom: 1rem;
+}
+
+.add-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.add-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.muted {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.9rem;
+}
+
+.agenda-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.agenda-card {
+  mat-card-title {
+    font-size: 1rem;
+  }
+
+  mat-card-subtitle {
+    font-size: 0.8rem;
+  }
+}
+
+.desc {
+  margin: 0 0 0.75rem;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.badges {
+  margin-bottom: 0.5rem;
+}
+
+.vote-block {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid color-mix(in srgb, var(--mat-sys-outline) 35%, transparent);
+}
+
+.vote-counts-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin: 0.75rem 0 0.5rem;
+  color: var(--mat-sys-on-surface);
+}
+
+// Participation section
+.participation-section {
+  margin-bottom: 0.5rem;
+}
+
+.participation-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.participation-label {
+  font-size: 0.85rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.participation-bar {
+  border-radius: 4px;
+}
+
+.quorum-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+
+  mat-icon {
+    font-size: 1rem;
+    width: 1rem;
+    height: 1rem;
+  }
+
+  &.quorum-ok {
+    background: color-mix(in srgb, #4caf50 15%, transparent);
+    color: #2e7d32;
+  }
+
+  &.quorum-fail {
+    background: color-mix(in srgb, #ff9800 15%, transparent);
+    color: #e65100;
+  }
+}
+
+// Vote result bars
+.vote-results-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 0.75rem;
+}
+
+.vote-result-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.vote-result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.vote-option-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-weight: 500;
+
+  &.winner {
+    color: #2e7d32;
+    font-weight: 600;
+  }
+}
+
+.winner-icon {
+  font-size: 1rem;
+  width: 1rem;
+  height: 1rem;
+  color: #f9a825;
+}
+
+.vote-option-stats {
+  font-size: 0.8rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.vote-bar-track {
+  height: 8px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--mat-sys-surface-variant) 50%, transparent);
+  overflow: hidden;
+}
+
+.vote-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--mat-sys-primary) 70%, transparent);
+  transition: width 0.4s ease;
+  min-width: 0;
+
+  &.winner-bar {
+    background: #4caf50;
+  }
+}
+
+// Validity summary
+.vote-validity {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  margin-bottom: 0.75rem;
+
+  mat-icon {
+    font-size: 1.3rem;
+    width: 1.3rem;
+    height: 1.3rem;
+  }
+
+  &.valid {
+    background: color-mix(in srgb, #4caf50 10%, transparent);
+    color: #2e7d32;
+  }
+
+  &.invalid {
+    background: color-mix(in srgb, #f44336 8%, transparent);
+    color: #c62828;
+  }
+}
+
+.vote-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.vote-select {
+  min-width: 180px;
+}
+
+.vote-options-builder {
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--mat-sys-outline) 40%, transparent);
+  border-radius: 8px;
+}
+
+.vote-builder-label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin: 0 0 0.5rem;
+}
+
+.existing-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.add-option-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.option-field {
+  flex: 1;
+}
+
+.hint-text {
+  font-size: 0.8rem;
+  color: var(--mat-sys-on-surface-variant);
+  margin: 0.25rem 0 0;
+}
+
+.vote-options-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.already-voted {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--mat-sys-primary) 10%, transparent);
+  color: var(--mat-sys-primary);
+  font-size: 0.9rem;
+
+  mat-icon {
+    font-size: 1.2rem;
+    width: 1.2rem;
+    height: 1.2rem;
+  }
+}
+
+// Timer banner
+.timer-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  margin-bottom: 0.75rem;
+
+  mat-icon {
+    font-size: 1.3rem;
+    width: 1.3rem;
+    height: 1.3rem;
+  }
+
+  &.timer-waiting {
+    background: color-mix(in srgb, #ff9800 12%, transparent);
+    color: #e65100;
+  }
+
+  &.timer-active {
+    background: color-mix(in srgb, #2196f3 10%, transparent);
+    color: #1565c0;
+  }
+
+  &.timer-expired {
+    background: color-mix(in srgb, #9e9e9e 12%, transparent);
+    color: #616161;
+  }
+}
+
+.countdown-text {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.timer-bar {
+  flex-basis: 100%;
+  border-radius: 4px;
+  margin-top: 0.25rem;
+}
+
+.start-vote-btn {
+  margin-left: auto;
+}
+
+.timer-divider {
+  margin: 0.75rem 0;
+}
+
+.timer-field {
+  width: 100%;
+}
+
+.vote-waiting-msg,
+.vote-closed-msg {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+
+  mat-icon {
+    font-size: 1.2rem;
+    width: 1.2rem;
+    height: 1.2rem;
+  }
+}
+
+.vote-waiting-msg {
+  background: color-mix(in srgb, #ff9800 10%, transparent);
+  color: #e65100;
+}
+
+.vote-closed-msg {
+  background: color-mix(in srgb, #9e9e9e 10%, transparent);
+  color: #616161;
+}
+
+.admin-vote-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed color-mix(in srgb, var(--mat-sys-outline) 30%, transparent);
+}
+
+.error-text {
+  color: var(--mat-sys-error);
+  font-size: 0.875rem;
+  margin: 0.75rem 0 0;
+}

@@ -1,0 +1,267 @@
+<div class="pqr-detail-page">
+  <button mat-button type="button" class="back-link" (click)="goBack()">
+    <mat-icon>arrow_back</mat-icon>
+    Volver al listado
+  </button>
+
+  @if (isNewPlaceholder()) {
+    <mat-card appearance="outlined" class="placeholder-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar class="placeholder-avatar">construction</mat-icon>
+        <mat-card-title>Nueva solicitud PQR</mat-card-title>
+        <mat-card-subtitle>Esta función estará disponible próximamente.</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-actions align="end">
+        <button mat-flat-button color="primary" type="button" (click)="goBack()">Entendido</button>
+      </mat-card-actions>
+    </mat-card>
+  } @else if (loading()) {
+    <div class="loading-wrap" aria-busy="true">
+      <mat-progress-spinner mode="indeterminate" diameter="48" />
+      <span>Cargando detalle…</span>
+    </div>
+  } @else if (error() && !pqr()) {
+    <mat-card class="error-card" appearance="outlined">
+      <mat-card-content>
+        <mat-icon color="warn">error_outline</mat-icon>
+        <p>{{ error() }}</p>
+        <button mat-stroked-button type="button" (click)="goBack()">Volver</button>
+      </mat-card-content>
+    </mat-card>
+  } @else if (pqr()) {
+    <header class="detail-header">
+      <div class="header-text">
+        <h1 class="detail-title">{{ pqr()!.title }}</h1>
+        <div class="header-badges">
+          <mat-chip-set>
+            <mat-chip class="status-chip" [ngStyle]="statusChipStyle(pqr()!.status)">{{ labels.status[pqr()!.status] }}</mat-chip>
+          </mat-chip-set>
+          <span class="priority-pill" [attr.data-priority]="pqr()!.priority">{{ labels.priority[pqr()!.priority] }}</span>
+        </div>
+      </div>
+    </header>
+
+    @if (error()) {
+      <p class="inline-error" role="alert">{{ error() }}</p>
+    }
+
+    <div class="detail-grid">
+      <mat-card class="info-card" appearance="outlined">
+        <mat-card-title>Información general</mat-card-title>
+        <mat-card-content>
+          <dl class="info-dl">
+            <dt>Tipo</dt>
+            <dd>{{ labels.tipo[pqr()!.tipo] }}</dd>
+            <dt>Categoría</dt>
+            <dd>{{ labels.category[pqr()!.category] }}</dd>
+            <dt>Unidad</dt>
+            <dd>{{ pqr()!.unitNumber }}</dd>
+            <dt>Creado por</dt>
+            <dd>{{ pqr()!.createdByName }}</dd>
+            <dt>Asignado a</dt>
+            <dd>{{ pqr()!.assignedToName ?? 'Sin asignar' }}</dd>
+            <dt>Fecha de creación</dt>
+            <dd>{{ pqr()!.createdAt | date: 'dd/MM/yyyy HH:mm' }}</dd>
+            <dt>Última actualización</dt>
+            <dd>{{ pqr()!.updatedAt | date: 'dd/MM/yyyy HH:mm' }}</dd>
+          </dl>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="desc-card" appearance="outlined">
+        <mat-card-title>Descripción</mat-card-title>
+        <mat-card-content>
+          <p class="description-text">{{ pqr()!.description }}</p>
+          @if (pqr()!.rejectionReason) {
+            <mat-divider />
+            <p class="rejection-label">Motivo del rechazo</p>
+            <p class="rejection-text">{{ pqr()!.rejectionReason }}</p>
+          }
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="sla-card" appearance="outlined" [class.sla-breached]="pqr()!.slaBreached">
+        <mat-card-title>Acuerdo de nivel de servicio (SLA)</mat-card-title>
+        <mat-card-content>
+          @if (pqr()!.slaBreached) {
+            <div class="sla-warning" role="alert">
+              <mat-icon>warning</mat-icon>
+              <div>
+                <strong>SLA incumplido</strong>
+                <p>La fecha límite ya venció. Priorice la gestión de esta solicitud.</p>
+              </div>
+            </div>
+          }
+          <dl class="info-dl compact">
+            <dt>Fecha límite</dt>
+            <dd>{{ pqr()!.slaDeadline | date: 'dd/MM/yyyy HH:mm' }}</dd>
+            <dt>Horas de SLA</dt>
+            <dd>{{ pqr()!.slaHours }} h</dd>
+          </dl>
+        </mat-card-content>
+      </mat-card>
+
+      @if (pqr()!.photos.length) {
+        <mat-card class="photos-card" appearance="outlined">
+          <mat-card-title>Fotografías</mat-card-title>
+          <mat-card-content>
+            <div class="photo-grid">
+              @for (photo of pqr()!.photos; track photo.id) {
+                <a class="photo-thumb" [href]="photo.url" target="_blank" rel="noopener noreferrer">
+                  <img [src]="photo.url" [alt]="'Evidencia ' + photo.phase" loading="lazy" />
+                  <span class="photo-caption">{{ photo.phase }} · {{ photo.createdAt | date: 'short' }}</span>
+                </a>
+              }
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+
+      <mat-card class="history-card" appearance="outlined">
+        <mat-card-title>Historial</mat-card-title>
+        <mat-card-content>
+          @if (!sortedHistory().length) {
+            <p class="muted">No hay movimientos registrados.</p>
+          } @else {
+            <ul class="timeline">
+              @for (entry of sortedHistory(); track entry.id) {
+                <li class="timeline-item">
+                  <span class="timeline-dot"></span>
+                  <div class="timeline-body">
+                    <div class="timeline-meta">
+                      <span class="timeline-actor">{{ entry.actorName }}</span>
+                      <time [attr.datetime]="entry.createdAt">{{ entry.createdAt | date: 'dd/MM/yyyy HH:mm' }}</time>
+                    </div>
+                    <p class="timeline-status">
+                      @if (entry.fromStatus) {
+                        <span>{{ historyStatusLabel(entry.fromStatus) }}</span>
+                        <mat-icon class="arrow-icon">arrow_forward</mat-icon>
+                      }
+                      <strong>{{ historyStatusLabel(entry.toStatus) }}</strong>
+                    </p>
+                    @if (entry.comment) {
+                      <p class="timeline-comment">{{ entry.comment }}</p>
+                    }
+                  </div>
+                </li>
+              }
+            </ul>
+          }
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <section class="actions-section">
+      <h2 class="actions-title">Acciones</h2>
+
+      @if (isAdmin()) {
+        <mat-card class="action-card" appearance="outlined">
+          <mat-card-title>Asignar responsable</mat-card-title>
+          <mat-card-content>
+            <p class="hint">Seleccione el funcionario de mantenimiento a asignar.</p>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Responsable</mat-label>
+              <mat-select [value]="assigneeId()" (selectionChange)="assigneeId.set($event.value)">
+                <mat-option value="">Seleccione…</mat-option>
+                @for (u of maintenanceUsers(); track u.id) {
+                  <mat-option [value]="u.id">{{ u.fullName }} ({{ u.email }})</mat-option>
+                }
+              </mat-select>
+              <mat-icon matPrefix>person</mat-icon>
+            </mat-form-field>
+            @if (!maintenanceUsers().length) {
+              <p class="warn-text">No hay usuarios de mantenimiento registrados.</p>
+            }
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Comentario (opcional)</mat-label>
+              <textarea matInput rows="2" [value]="assignComment()" (input)="assignComment.set($any($event.target).value)"></textarea>
+            </mat-form-field>
+            <button mat-flat-button color="primary" type="button" [disabled]="!assigneeId().trim() || assigning()" (click)="submitAssign()">
+              {{ assigning() ? 'Guardando…' : 'Asignar' }}
+            </button>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="action-card" appearance="outlined">
+          <mat-card-title>Cambiar estado</mat-card-title>
+          <mat-card-content>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Nuevo estado</mat-label>
+              <mat-select [value]="adminStatus()" (selectionChange)="adminStatus.set($event.value)">
+                <mat-option value="">Seleccione…</mat-option>
+                @for (st of allStatusesList; track st) {
+                  <mat-option [value]="st">{{ labels.status[st] }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            @if (adminStatus() === 'RECHAZADO') {
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Motivo del rechazo</mat-label>
+                <textarea matInput rows="2" [value]="adminRejectionReason()" (input)="adminRejectionReason.set($any($event.target).value)"></textarea>
+              </mat-form-field>
+            }
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Comentario (opcional)</mat-label>
+              <textarea matInput rows="2" [value]="adminComment()" (input)="adminComment.set($any($event.target).value)"></textarea>
+            </mat-form-field>
+            <button mat-stroked-button color="primary" type="button" [disabled]="!adminStatus() || adminStatusSaving()" (click)="submitAdminStatus()">
+              {{ adminStatusSaving() ? 'Guardando…' : 'Guardar estado' }}
+            </button>
+          </mat-card-content>
+        </mat-card>
+      }
+
+      @if (isMaintenance() && maintNextOptions().length) {
+        <mat-card class="action-card" appearance="outlined">
+          <mat-card-title>Actualizar estado</mat-card-title>
+          <mat-card-content>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Siguiente estado</mat-label>
+              <mat-select [value]="maintStatus()" (selectionChange)="maintStatus.set($event.value)">
+                <mat-option value="">Seleccione…</mat-option>
+                @for (st of maintNextOptions(); track st) {
+                  <mat-option [value]="st">{{ labels.status[st] }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Comentario (opcional)</mat-label>
+              <textarea matInput rows="2" [value]="maintComment()" (input)="maintComment.set($any($event.target).value)"></textarea>
+            </mat-form-field>
+            <button mat-flat-button color="primary" type="button" [disabled]="!maintStatus() || maintSaving()" (click)="submitMaintenanceStatus()">
+              {{ maintSaving() ? 'Guardando…' : 'Registrar avance' }}
+            </button>
+          </mat-card-content>
+        </mat-card>
+      }
+
+      @if (showResidentClose()) {
+        <mat-card class="action-card" appearance="outlined">
+          <mat-card-title>Cerrar solicitud</mat-card-title>
+          <mat-card-content>
+            <p class="hint">Califique su nivel de satisfacción con la solución recibida (obligatorio).</p>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Satisfacción (1 a 5)</mat-label>
+              <mat-select
+                placeholder="Seleccione una calificación"
+                [value]="closeRating()"
+                (selectionChange)="closeRating.set($event.value)"
+              >
+                @for (n of satisfactionOptions; track n) {
+                  <mat-option [value]="n">{{ n }} — {{ n >= 4 ? 'Muy satisfecho' : n === 3 ? 'Neutral' : 'Poco satisfecho' }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Comentario (opcional)</mat-label>
+              <textarea matInput rows="2" [value]="closeComment()" (input)="closeComment.set($any($event.target).value)"></textarea>
+            </mat-form-field>
+            <button mat-flat-button color="primary" type="button" [disabled]="closeRating() == null || closing()" (click)="submitClose()">
+              {{ closing() ? 'Cerrando…' : 'Cerrar solicitud' }}
+            </button>
+          </mat-card-content>
+        </mat-card>
+      }
+    </section>
+  }
+</div>

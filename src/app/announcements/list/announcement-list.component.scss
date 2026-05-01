@@ -1,0 +1,112 @@
+.ann-list-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 16px 80px;
+}
+
+.page-header { margin-bottom: 20px; }
+
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.page-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+.title-icon { font-size: 28px; width: 28px; height: 28px; }
+.filter-chips { margin-bottom: 12px; }
+
+.error-banner {
+  margin-bottom: 16px;
+  mat-card-content { display: flex; align-items: center; gap: 8px; }
+}
+
+.loading-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 48px 0;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.empty-state { text-align: center; padding: 64px 16px; }
+.empty-icon { font-size: 64px; width: 64px; height: 64px; color: rgba(0, 0, 0, 0.2); }
+.empty-title { font-size: 1.1rem; font-weight: 500; margin: 12px 0 4px; }
+.empty-hint { color: rgba(0, 0, 0, 0.5); font-size: 0.875rem; }
+
+.card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ann-card {
+  cursor: pointer;
+  transition: box-shadow 0.2s, border-left-color 0.2s;
+  border-left: 4px solid transparent;
+  &:hover { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12); }
+  &.unread { border-left-color: #1976d2; background: #f5f9ff; }
+}
+
+.ann-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(25, 118, 210, 0.1);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  mat-icon { color: #1976d2; }
+}
+
+.ann-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.unread-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #1976d2;
+  flex-shrink: 0;
+}
+
+.scope-icon-inline {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  vertical-align: middle;
+}
+
+.ann-body-preview {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: rgba(0, 0, 0, 0.7);
+  font-size: 0.9rem;
+  margin: 4px 0 0;
+  line-height: 1.5;
+}
+
+.paginator { margin-top: 16px; }
+
+.fab-create {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 5;
+}

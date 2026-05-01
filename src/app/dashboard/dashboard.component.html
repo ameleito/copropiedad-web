@@ -1,0 +1,33 @@
+<section class="dashboard">
+  <header class="welcome">
+    <h1>Bienvenido, {{ auth.displayName() }}</h1>
+    <p class="subtitle">Selecciona un módulo para comenzar.</p>
+  </header>
+
+  <div class="feature-grid" role="list">
+    @for (feature of features; track feature.title) {
+      <mat-card class="feature-card"
+                appearance="outlined"
+                role="listitem"
+                tabindex="0"
+                [class.clickable]="feature.route"
+                (click)="navigateTo(feature.route)"
+                (keydown.enter)="navigateTo(feature.route)">
+        <mat-card-header>
+          <div mat-card-avatar class="feature-avatar">
+            <mat-icon aria-hidden="true">{{ feature.icon }}</mat-icon>
+          </div>
+          <mat-card-title>{{ feature.title }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>{{ feature.description }}</p>
+        </mat-card-content>
+        @if (!feature.route) {
+          <mat-card-footer>
+            <p class="coming-soon">Próximamente</p>
+          </mat-card-footer>
+        }
+      </mat-card>
+    }
+  </div>
+</section>

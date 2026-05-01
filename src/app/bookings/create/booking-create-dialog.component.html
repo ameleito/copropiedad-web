@@ -1,0 +1,59 @@
+<h2 mat-dialog-title>Nueva reserva</h2>
+
+<mat-dialog-content class="dialog-body">
+  <section class="area-summary">
+    <h3>{{ area.name }}</h3>
+    @if (area.description) {
+      <p class="muted">{{ area.description }}</p>
+    }
+    <ul class="facts">
+      <li>
+        <mat-icon inline>groups</mat-icon>
+        Capacidad: {{ area.capacity == null ? '—' : area.capacity }}
+      </li>
+      <li>
+        <mat-icon inline>payments</mat-icon>
+        @if (area.requiresDeposit) {
+          Depósito requerido
+          @if (area.depositAmount != null) {
+            — {{ area.depositAmount | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}
+          }
+        } @else {
+          Sin depósito
+        }
+      </li>
+    </ul>
+  </section>
+
+  <form [formGroup]="form" class="form-grid">
+    <mat-form-field appearance="outline" class="full-row">
+      <mat-label>Fecha de reserva</mat-label>
+      <input matInput [matDatepicker]="picker" formControlName="date" [min]="today" [max]="maxDate()" />
+      <mat-datepicker-toggle matIconSuffix [for]="picker" />
+      <mat-datepicker #picker />
+      @if (form.controls.date.hasError('required') && form.controls.date.touched) {
+        <mat-error>Seleccione una fecha</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-row">
+      <mat-label>Asistentes (opcional)</mat-label>
+      <input matInput type="number" min="1" formControlName="attendees" />
+    </mat-form-field>
+  </form>
+
+  @if (errorMessage()) {
+    <p class="error-text">{{ errorMessage() }}</p>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" mat-dialog-close [disabled]="submitting()">Cerrar</button>
+  <button mat-flat-button color="primary" type="button" (click)="submit()" [disabled]="submitting() || form.invalid">
+    @if (submitting()) {
+      <mat-progress-spinner diameter="20" mode="indeterminate" />
+    } @else {
+      Reservar
+    }
+  </button>
+</mat-dialog-actions>

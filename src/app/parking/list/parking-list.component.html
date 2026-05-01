@@ -1,0 +1,224 @@
+<div class="parking-page">
+  <header class="page-header">
+    <h1 class="page-title">
+      <mat-icon aria-hidden="true" class="title-icon">local_parking</mat-icon>
+      Parqueadero
+    </h1>
+    <p class="subtitle">Vehículos registrados y control de cupos</p>
+  </header>
+
+  <mat-tab-group animationDuration="0ms" class="parking-tabs">
+    <mat-tab label="Vehículos">
+      <div class="tab-panel">
+        <div class="tab-toolbar">
+          @if (canRegisterVehicle()) {
+            <button mat-flat-button color="primary" type="button" (click)="openRegisterVehicle()">
+              <mat-icon>add</mat-icon>
+              Registrar Vehículo
+            </button>
+          }
+        </div>
+
+        @if (vehiclesError()) {
+          <mat-card class="error-banner" appearance="outlined">
+            <mat-card-content>
+              <mat-icon color="warn">error_outline</mat-icon>
+              <span>{{ vehiclesError() }}</span>
+            </mat-card-content>
+          </mat-card>
+        }
+
+        @if (vehiclesLoading()) {
+          <div class="loading-wrap">
+            <mat-progress-spinner mode="indeterminate" diameter="48" />
+            <span>Cargando vehículos…</span>
+          </div>
+        } @else if (!vehicles().length) {
+          <div class="empty-state">
+            <mat-icon class="empty-icon">directions_car</mat-icon>
+            <p class="empty-title">No hay vehículos registrados</p>
+            <p class="empty-hint">Los residentes pueden registrar sus vehículos aquí.</p>
+          </div>
+        } @else {
+          <mat-card appearance="outlined" class="table-card">
+            <table mat-table [dataSource]="vehicles()" class="data-table">
+              <ng-container matColumnDef="plate">
+                <th mat-header-cell *matHeaderCellDef>Placa</th>
+                <td mat-cell *matCellDef="let v"><strong>{{ v.plate }}</strong></td>
+              </ng-container>
+              <ng-container matColumnDef="brand">
+                <th mat-header-cell *matHeaderCellDef>Marca</th>
+                <td mat-cell *matCellDef="let v">{{ v.brand ?? '—' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="model">
+                <th mat-header-cell *matHeaderCellDef>Modelo</th>
+                <td mat-cell *matCellDef="let v">{{ v.model ?? '—' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="color">
+                <th mat-header-cell *matHeaderCellDef>Color</th>
+                <td mat-cell *matCellDef="let v">{{ v.color ?? '—' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="unitNumber">
+                <th mat-header-cell *matHeaderCellDef>Unidad</th>
+                <td mat-cell *matCellDef="let v">{{ v.unitNumber }}</td>
+              </ng-container>
+              <ng-container matColumnDef="ownerName">
+                <th mat-header-cell *matHeaderCellDef>Propietario</th>
+                <td mat-cell *matCellDef="let v">{{ v.ownerName }}</td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="vehicleColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: vehicleColumns"></tr>
+            </table>
+          </mat-card>
+        }
+      </div>
+    </mat-tab>
+
+    @if (showStaffTabs()) {
+      <mat-tab label="Parqueaderos">
+        <div class="tab-panel">
+          @if (spotsError()) {
+            <mat-card class="error-banner" appearance="outlined">
+              <mat-card-content>
+                <mat-icon color="warn">error_outline</mat-icon>
+                <span>{{ spotsError() }}</span>
+              </mat-card-content>
+            </mat-card>
+          }
+
+          @if (spotsLoading()) {
+            <div class="loading-wrap">
+              <mat-progress-spinner mode="indeterminate" diameter="48" />
+              <span>Cargando cupos…</span>
+            </div>
+          } @else if (!spots().length) {
+            <div class="empty-state">
+              <mat-icon class="empty-icon">local_parking</mat-icon>
+              <p class="empty-title">No hay cupos configurados</p>
+            </div>
+          } @else {
+            <mat-card appearance="outlined" class="table-card">
+              <table mat-table [dataSource]="spots()" class="data-table">
+                <ng-container matColumnDef="spotNumber">
+                  <th mat-header-cell *matHeaderCellDef>Número</th>
+                  <td mat-cell *matCellDef="let s">{{ s.spotNumber }}</td>
+                </ng-container>
+                <ng-container matColumnDef="status">
+                  <th mat-header-cell *matHeaderCellDef>Estado</th>
+                  <td mat-cell *matCellDef="let s">
+                    <mat-chip-set>
+                      <mat-chip [color]="spotStatusChipColor(s.status)">{{ statusLabel(s.status) }}</mat-chip>
+                    </mat-chip-set>
+                  </td>
+                </ng-container>
+                <ng-container matColumnDef="unitNumber">
+                  <th mat-header-cell *matHeaderCellDef>Unidad asignada</th>
+                  <td mat-cell *matCellDef="let s">{{ s.unitNumber ?? '—' }}</td>
+                </ng-container>
+                <ng-container matColumnDef="floor">
+                  <th mat-header-cell *matHeaderCellDef>Piso</th>
+                  <td mat-cell *matCellDef="let s">{{ s.floor ?? '—' }}</td>
+                </ng-container>
+                <ng-container matColumnDef="visitor">
+                  <th mat-header-cell *matHeaderCellDef>Tipo</th>
+                  <td mat-cell *matCellDef="let s">{{ s.visitor ? 'Visitante' : 'Residente' }}</td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="spotColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: spotColumns"></tr>
+              </table>
+            </mat-card>
+          }
+        </div>
+      </mat-tab>
+
+      <mat-tab label="Registro">
+        <div class="tab-panel">
+          <div class="tab-toolbar">
+            <button mat-flat-button color="primary" type="button" (click)="openLogEntry()">
+              <mat-icon>login</mat-icon>
+              Registrar Ingreso
+            </button>
+          </div>
+
+          @if (logError()) {
+            <mat-card class="error-banner" appearance="outlined">
+              <mat-card-content>
+                <mat-icon color="warn">error_outline</mat-icon>
+                <span>{{ logError() }}</span>
+              </mat-card-content>
+            </mat-card>
+          }
+
+          @if (logLoading()) {
+            <div class="loading-wrap">
+              <mat-progress-spinner mode="indeterminate" diameter="48" />
+              <span>Cargando registro…</span>
+            </div>
+          } @else if (!logEntries().length) {
+            <div class="empty-state">
+              <mat-icon class="empty-icon">history</mat-icon>
+              <p class="empty-title">Sin movimientos</p>
+              <p class="empty-hint">Registre un ingreso para comenzar el historial.</p>
+            </div>
+          } @else {
+            <mat-card appearance="outlined" class="table-card">
+              <table mat-table [dataSource]="logEntries()" class="data-table">
+                <ng-container matColumnDef="plate">
+                  <th mat-header-cell *matHeaderCellDef>Placa</th>
+                  <td mat-cell *matCellDef="let e">{{ e.plate ?? '—' }}</td>
+                </ng-container>
+                <ng-container matColumnDef="spotNumber">
+                  <th mat-header-cell *matHeaderCellDef>Cupo</th>
+                  <td mat-cell *matCellDef="let e">{{ e.spotNumber ?? '—' }}</td>
+                </ng-container>
+                <ng-container matColumnDef="entryTime">
+                  <th mat-header-cell *matHeaderCellDef>Ingreso</th>
+                  <td mat-cell *matCellDef="let e">{{ e.entryTime | date: 'dd/MM/yyyy HH:mm' }}</td>
+                </ng-container>
+                <ng-container matColumnDef="exitTime">
+                  <th mat-header-cell *matHeaderCellDef>Salida</th>
+                  <td mat-cell *matCellDef="let e">
+                    @if (e.exitTime) {
+                      {{ e.exitTime | date: 'dd/MM/yyyy HH:mm' }}
+                    } @else {
+                      <span class="active-badge">Activo</span>
+                    }
+                  </td>
+                </ng-container>
+                <ng-container matColumnDef="notes">
+                  <th mat-header-cell *matHeaderCellDef>Notas</th>
+                  <td mat-cell *matCellDef="let e">{{ e.notes ?? '—' }}</td>
+                </ng-container>
+                <ng-container matColumnDef="actions">
+                  <th mat-header-cell *matHeaderCellDef></th>
+                  <td mat-cell *matCellDef="let e">
+                    @if (isActiveEntry(e)) {
+                      <button
+                        mat-stroked-button
+                        color="primary"
+                        type="button"
+                        (click)="registerExit(e, $event)">
+                        Registrar Salida
+                      </button>
+                    }
+                  </td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="logColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: logColumns"></tr>
+              </table>
+            </mat-card>
+          }
+
+          <mat-paginator
+            class="paginator"
+            [length]="logTotal()"
+            [pageIndex]="logPageIndex()"
+            [pageSize]="logPageSize()"
+            [pageSizeOptions]="[10, 20, 50]"
+            showFirstLastButtons
+            (page)="onLogPage($event)" />
+        </div>
+      </mat-tab>
+    }
+  </mat-tab-group>
+</div>

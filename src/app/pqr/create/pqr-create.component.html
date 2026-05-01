@@ -1,0 +1,135 @@
+<div class="pqr-create-page">
+  <mat-card class="pqr-create-card">
+    <mat-card-header>
+      <mat-card-title>Nueva Solicitud PQR</mat-card-title>
+      <mat-card-subtitle>Radica una petición, queja o reclamo ante la administración</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      @if (errorMessage) {
+        <div class="alert alert-error" role="alert">{{ errorMessage }}</div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="submit()" class="pqr-form">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Tipo de solicitud</mat-label>
+          <mat-select formControlName="tipo" required>
+            @for (t of tipos; track t) {
+              <mat-option [value]="t">{{ tipoLabels[t] }}</mat-option>
+            }
+          </mat-select>
+          @if (form.controls.tipo.invalid && form.controls.tipo.touched) {
+            <mat-error>Selecciona un tipo de solicitud.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Categoría</mat-label>
+          <mat-select formControlName="category" required>
+            @for (c of categorias; track c) {
+              <mat-option [value]="c">{{ categoryLabels[c] }}</mat-option>
+            }
+          </mat-select>
+          @if (form.controls.category.invalid && form.controls.category.touched) {
+            <mat-error>Selecciona una categoría.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Título</mat-label>
+          <input matInput formControlName="title" maxlength="120" required />
+          <mat-hint align="end">{{ form.controls.title.value.length || 0 }} / 120</mat-hint>
+          @if (form.controls.title.hasError('required') && form.controls.title.touched) {
+            <mat-error>Ingresa un título.</mat-error>
+          }
+          @if (form.controls.title.hasError('maxlength') && form.controls.title.touched) {
+            <mat-error>Máximo 120 caracteres.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Descripción</mat-label>
+          <textarea matInput formControlName="description" rows="5" required></textarea>
+          @if (form.controls.description.invalid && form.controls.description.touched) {
+            <mat-error>Describe el motivo de tu solicitud.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Prioridad</mat-label>
+          <mat-select formControlName="priority" required>
+            @for (pr of prioridades; track pr) {
+              <mat-option [value]="pr">{{ priorityLabels[pr] }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <div class="upload-section">
+          <span class="upload-label">Evidencia fotográfica</span>
+          <p class="upload-hint">Hasta 5 imágenes (opcional). Formatos: JPG, PNG, etc.</p>
+
+          <input
+            #fileInput
+            type="file"
+            class="visually-hidden"
+            accept="image/*"
+            multiple
+            (change)="onFileInputChange($event)"
+          />
+
+          <div
+            class="drop-zone"
+            (drop)="onDrop($event)"
+            (dragover)="onDragOver($event)"
+            (click)="triggerFileInput(fileInput)"
+            role="button"
+            tabindex="0"
+            (keydown.enter)="triggerFileInput(fileInput)"
+            (keydown.space)="$event.preventDefault(); triggerFileInput(fileInput)"
+          >
+            <mat-icon class="drop-icon" aria-hidden="true">cloud_upload</mat-icon>
+            <p>Arrastra tus fotos aquí o haz clic para seleccionarlas</p>
+            <button
+              mat-stroked-button
+              type="button"
+              color="primary"
+              (click)="triggerFileInput(fileInput); $event.stopPropagation()"
+            >
+              <mat-icon>add_photo_alternate</mat-icon>
+              Elegir archivos
+            </button>
+          </div>
+
+          @if (photoError) {
+            <div class="alert alert-warning" role="status">{{ photoError }}</div>
+          }
+
+          @if (photoPreviews.length) {
+            <mat-chip-set class="photo-chip-set" aria-label="Vistas previas de evidencia">
+              @for (preview of photoPreviews; track preview.id; let i = $index) {
+                <mat-chip [removable]="true" (removed)="removePhoto(i)">
+                  <img matChipAvatar [src]="preview.url" alt="Vista previa de evidencia" />
+                  <button type="button" matChipRemove [attr.aria-label]="'Quitar imagen ' + (i + 1)">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </mat-chip>
+              }
+            </mat-chip-set>
+          }
+        </div>
+
+        <div class="actions">
+          <button mat-raised-button color="primary" type="submit" [disabled]="submitting">
+            @if (submitting) {
+              <mat-spinner diameter="20" class="btn-spinner"></mat-spinner>
+            } @else {
+              <mat-icon>send</mat-icon>
+            }
+            Enviar Solicitud
+          </button>
+          <a mat-button color="primary" routerLink="/pqr">Cancelar</a>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

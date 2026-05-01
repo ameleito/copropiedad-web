@@ -1,0 +1,42 @@
+.dialog-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 320px;
+  padding-top: 8px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  border-radius: 4px;
+  background: #ffebee;
+  color: #b71c1c;
+  font-size: 0.875rem;
+}
+
+.loading-inline {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0 16px;
+  color: rgba(0, 0, 0, 0.54);
+}
+
+.warn-text {
+  color: #f57c00;
+  font-size: 0.875rem;
+  margin: 0 0 12px;
+}
+
+mat-dialog-actions mat-progress-spinner {
+  display: inline-block;
+  vertical-align: middle;
+}

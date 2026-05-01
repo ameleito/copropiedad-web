@@ -1,0 +1,103 @@
+<h2 mat-dialog-title>
+  <mat-icon class="dialog-icon">receipt</mat-icon>
+  Nueva Factura
+</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" (ngSubmit)="submit()" id="inv-form">
+
+    <!-- Unit cascading selector -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Torre</mat-label>
+      <mat-select [value]="selectedTorre" (selectionChange)="onTorreChange($event.value)">
+        @for (g of torreGroups(); track g.name) {
+          <mat-option [value]="g.name">{{ g.name }}</mat-option>
+        }
+      </mat-select>
+      <mat-icon matPrefix>domain</mat-icon>
+    </mat-form-field>
+
+    @if (selectedTorre && interiorsForTorre().length > 0) {
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Interior</mat-label>
+        <mat-select [value]="selectedTowerId" (selectionChange)="onInteriorChange($event.value)">
+          @for (t of interiorsForTorre(); track t.id) {
+            <mat-option [value]="t.id">{{ t.name }}</mat-option>
+          }
+        </mat-select>
+        <mat-icon matPrefix>meeting_room</mat-icon>
+      </mat-form-field>
+    }
+
+    @if (selectedTowerId && filteredUnits().length > 0) {
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Apartamento</mat-label>
+        <mat-select formControlName="unitId">
+          @for (u of filteredUnits(); track u.id) {
+            <mat-option [value]="u.id">Apto {{ u.number }}</mat-option>
+          }
+        </mat-select>
+        <mat-icon matPrefix>door_front</mat-icon>
+      </mat-form-field>
+    }
+
+    @if (feeTypes().length > 0) {
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Tipo de cobro</mat-label>
+        <mat-select formControlName="feeTypeId">
+          <mat-option value="">Sin tipo</mat-option>
+          @for (ft of feeTypes(); track ft.id) {
+            <mat-option [value]="ft.id">{{ ft.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    }
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Periodo</mat-label>
+      <mat-select formControlName="period">
+        @for (p of periodOptions; track p) {
+          <mat-option [value]="p">{{ formatPeriod(p) }}</mat-option>
+        }
+      </mat-select>
+      <mat-icon matPrefix>calendar_month</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Monto ($)</mat-label>
+      <input matInput type="number" formControlName="amount" min="1" />
+      <mat-icon matPrefix>attach_money</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Fecha de vencimiento</mat-label>
+      <input matInput [matDatepicker]="picker" formControlName="dueDate" />
+      <mat-datepicker-toggle matSuffix [for]="picker" />
+      <mat-datepicker #picker />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Notas (opcional)</mat-label>
+      <textarea matInput formControlName="notes" rows="2"></textarea>
+    </mat-form-field>
+
+    @if (errorMessage) {
+      <div class="error-msg">
+        <mat-icon color="warn" inline>error</mat-icon>
+        {{ errorMessage }}
+      </div>
+    }
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close type="button" [disabled]="submitting">Cancelar</button>
+  <button mat-flat-button color="primary" type="submit" form="inv-form" [disabled]="submitting || form.invalid">
+    @if (submitting) {
+      <mat-progress-spinner mode="indeterminate" diameter="20" />
+    } @else {
+      <mat-icon>save</mat-icon>
+      Crear Factura
+    }
+  </button>
+</mat-dialog-actions>

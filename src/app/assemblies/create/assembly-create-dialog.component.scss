@@ -1,0 +1,28 @@
+.dialog-body {
+  padding-top: 0.5rem;
+  min-width: 0;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem 1rem;
+
+  @media (max-width: 520px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.full-row {
+  grid-column: 1 / -1;
+}
+
+.error-text {
+  color: var(--mat-sys-error);
+  font-size: 0.875rem;
+  margin: 0.5rem 0 0;
+}
+
+mat-dialog-actions {
+  padding-top: 0.5rem;
+}

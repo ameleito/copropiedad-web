@@ -1,0 +1,25 @@
+.sidenav-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 16px 16px;
+}
+
+.logo-icon {
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+  color: var(--mat-sys-primary, #3f51b5);
+}
+
+.header-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.87);
+}
+
+.active-item {
+  background: rgba(63, 81, 181, 0.1) !important;
+  color: var(--mat-sys-primary, #3f51b5) !important;
+  border-left: 3px solid var(--mat-sys-primary, #3f51b5);
+}

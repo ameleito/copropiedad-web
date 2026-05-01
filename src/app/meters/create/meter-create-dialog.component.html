@@ -1,0 +1,44 @@
+<h2 mat-dialog-title>Crear Medidor</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="dialog-form" (ngSubmit)="submit()">
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>ID de unidad</mat-label>
+      <input matInput formControlName="unitId" autocomplete="off" />
+      <mat-hint>UUID o identificador de la unidad</mat-hint>
+      @if (form.controls.unitId.touched && form.controls.unitId.hasError('required')) {
+        <mat-error>Requerido</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Tipo</mat-label>
+      <mat-select formControlName="type">
+        @for (t of meterTypes; track t) {
+          <mat-option [value]="t">{{ t === 'AGUA' ? 'Agua' : t === 'GAS' ? 'Gas' : 'Electricidad' }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Número de medidor</mat-label>
+      <input matInput formControlName="meterNumber" autocomplete="off" />
+      <mat-hint>Opcional</mat-hint>
+    </mat-form-field>
+
+    @if (errorMessage()) {
+      <p class="error-text">{{ errorMessage() }}</p>
+    }
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()" [disabled]="submitting()">Cancelar</button>
+  <button mat-flat-button color="primary" type="button" (click)="submit()" [disabled]="submitting()">
+    @if (submitting()) {
+      <mat-spinner diameter="20" />
+    } @else {
+      Guardar
+    }
+  </button>
+</mat-dialog-actions>

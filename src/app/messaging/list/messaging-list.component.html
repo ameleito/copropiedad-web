@@ -1,0 +1,57 @@
+<div class="messaging-page">
+  <div class="page-header">
+    <h1 class="page-title">
+      <mat-icon class="title-icon" aria-hidden="true">forum</mat-icon>
+      Mensajes
+    </h1>
+    <button mat-flat-button color="primary" type="button" (click)="openCreate()">
+      <mat-icon>add_comment</mat-icon>
+      Nueva conversación
+    </button>
+  </div>
+
+  @if (isAdmin()) {
+    <p class="role-hint">Como administrador puede iniciar conversaciones con cualquier usuario del edificio.</p>
+  }
+
+  @if (loadError()) {
+    <mat-card class="error-banner" appearance="outlined">
+      <mat-card-content>
+        <mat-icon color="warn">error_outline</mat-icon>
+        <span>{{ loadError() }}</span>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  @if (loading()) {
+    <div class="loading-wrap">
+      <mat-spinner diameter="40"></mat-spinner>
+      <span>Cargando conversaciones…</span>
+    </div>
+  } @else if (items().length === 0) {
+    <div class="empty-state">
+      <mat-icon class="empty-icon">chat_bubble_outline</mat-icon>
+      <p>No tienes conversaciones</p>
+      <button mat-stroked-button color="primary" type="button" (click)="openCreate()">
+        Iniciar una conversación
+      </button>
+    </div>
+  } @else {
+    <mat-card appearance="outlined" class="list-card">
+      <mat-nav-list>
+        @for (conv of items(); track conv.id) {
+          <mat-list-item (click)="openChat(conv.id)" class="conv-item">
+            <span matListItemTitle>{{ conv.subject }}</span>
+            <span matListItemLine class="preview-line">{{ preview(conv) }}</span>
+            <span matListItemLine class="meta-line">
+              <span class="participants">{{ participantsLabel(conv) }}</span>
+              @if (conv.lastMessageAt) {
+                <span class="time">{{ formatTime(conv.lastMessageAt) }}</span>
+              }
+            </span>
+          </mat-list-item>
+        }
+      </mat-nav-list>
+    </mat-card>
+  }
+</div>

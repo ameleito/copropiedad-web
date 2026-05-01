@@ -1,0 +1,111 @@
+<h2 mat-dialog-title>Registrar visitante</h2>
+
+<mat-dialog-content>
+  @if (errorMessage) {
+    <div class="error-banner" role="alert">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ errorMessage }}</span>
+    </div>
+  }
+
+  <form [formGroup]="form" class="dialog-form" (ngSubmit)="submit()">
+
+    @if (isSecurity) {
+      <mat-slide-toggle formControlName="walkIn" color="primary" class="walkin-toggle">
+        Ingreso directo (sin pre-registro)
+      </mat-slide-toggle>
+    }
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Nombre del visitante</mat-label>
+      <input matInput formControlName="fullName" />
+      <mat-icon matPrefix>person</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Documento de identidad</mat-label>
+      <input matInput formControlName="idDocument" />
+      <mat-icon matPrefix>badge</mat-icon>
+    </mat-form-field>
+
+    @if (!form.controls.walkIn.value) {
+      <div class="datetime-row">
+        <mat-form-field appearance="outline" class="date-field">
+          <mat-label>Fecha esperada</mat-label>
+          <input matInput [matDatepicker]="picker" formControlName="expectedDate" [min]="today" />
+          <mat-datepicker-toggle matSuffix [for]="picker" />
+          <mat-datepicker #picker />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="time-field">
+          <mat-label>Hora</mat-label>
+          <mat-select formControlName="expectedTime">
+            @for (t of timeSlots; track t) {
+              <mat-option [value]="t">{{ t }}</mat-option>
+            }
+          </mat-select>
+          <mat-icon matPrefix>schedule</mat-icon>
+        </mat-form-field>
+      </div>
+    }
+
+    @if (!isResident) {
+      <h4 class="section-label">Unidad destino</h4>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Torre</mat-label>
+        <mat-select (selectionChange)="onTorreChange($event.value)">
+          @for (g of torreGroups(); track g.name) {
+            <mat-option [value]="g.name">{{ g.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      @if (selectedTorre()) {
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Interior</mat-label>
+          <mat-select (selectionChange)="onInteriorChange($event.value)">
+            @for (int of interiorsForTorre(); track int.id) {
+              <mat-option [value]="int.id">{{ int.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      }
+
+      @if (selectedTowerId()) {
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Apartamento</mat-label>
+          <mat-select formControlName="unitId">
+            @for (unit of filteredUnits(); track unit.id) {
+              <mat-option [value]="unit.id">
+                Apto {{ unit.number }} (Piso {{ unit.floor }})
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      }
+    }
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Notas</mat-label>
+      <input matInput formControlName="notes" placeholder="Ej: Viene a reparación, familiar, etc." />
+      <mat-icon matPrefix>notes</mat-icon>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()">Cancelar</button>
+  <button
+    mat-flat-button
+    color="primary"
+    type="button"
+    [disabled]="submitting"
+    (click)="submit()">
+    @if (submitting) {
+      <mat-progress-spinner diameter="18" mode="indeterminate" />
+    } @else {
+      {{ form.controls.walkIn.value ? 'Registrar ingreso' : 'Pre-registrar' }}
+    }
+  </button>
+</mat-dialog-actions>

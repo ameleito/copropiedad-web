@@ -1,0 +1,385 @@
+<h2 mat-dialog-title class="dialog-title-row">
+  <span class="title-text">{{ assembly().title }}</span>
+  <button mat-icon-button type="button" (click)="close()" [attr.aria-label]="'Cerrar'">
+    <mat-icon>close</mat-icon>
+  </button>
+</h2>
+
+<mat-dialog-content class="detail-body">
+  @if (pageLoading()) {
+    <div class="loading-inline">
+      <mat-progress-spinner diameter="40" mode="indeterminate" />
+      <span>Cargando…</span>
+    </div>
+  } @else {
+    <section class="header-section">
+      <div class="header-meta">
+        <mat-chip-set>
+          <mat-chip [color]="statusChipColor(assembly().status)">{{ statusLabel(assembly().status) }}</mat-chip>
+        </mat-chip-set>
+        <span class="type-pill">{{ typeLabel(assembly().type) }}</span>
+      </div>
+      <div class="header-facts">
+        <span>
+          <mat-icon>event</mat-icon>
+          {{ assembly().scheduledAt | date: 'dd/MM/yyyy HH:mm' }}
+        </span>
+        @if (assembly().location) {
+          <span>
+            <mat-icon>place</mat-icon>
+            {{ assembly().location }}
+          </span>
+        }
+        @if (assembly().virtualLink) {
+          <a class="virtual-link" [href]="assembly().virtualLink!" target="_blank" rel="noopener noreferrer">
+            <mat-icon>link</mat-icon>
+            Enlace virtual
+          </a>
+        }
+      </div>
+      <div class="quorum-row">
+        <span>Cuórum requerido: <strong>{{ assembly().quorumRequired }}%</strong></span>
+        @if (assembly().quorumAchieved != null) {
+          <span> · Logrado: <strong>{{ assembly().quorumAchieved }}%</strong></span>
+        }
+        <span> · Asistentes: <strong>{{ assembly().attendeeCount }}</strong></span>
+      </div>
+      <p class="byline">Creada por {{ assembly().createdByName }}</p>
+
+      @if (isResident()) {
+        <div class="attendee-row">
+          @if (isRegisteredAttendee()) {
+            <mat-chip color="primary"><mat-icon>check_circle</mat-icon> Ya estás registrado como asistente</mat-chip>
+          } @else {
+            <button
+              mat-flat-button
+              color="accent"
+              type="button"
+              (click)="registerAsAttendee()"
+              [disabled]="attendeeRegistering() || assembly().status === 'FINALIZADA' || assembly().status === 'CANCELADA'">
+              @if (attendeeRegistering()) {
+                <mat-progress-spinner diameter="18" mode="indeterminate" />
+              } @else {
+                <mat-icon>how_to_reg</mat-icon> Registrarme como asistente
+              }
+            </button>
+          }
+        </div>
+      }
+    </section>
+
+    <mat-divider />
+
+    @if (isAdmin()) {
+      <section class="admin-status">
+        <h3 class="section-title">Estado de la asamblea</h3>
+        <div class="status-row">
+          <mat-form-field appearance="outline" class="status-field">
+            <mat-label>Estado</mat-label>
+            <mat-select [value]="selectedStatus()" (selectionChange)="selectedStatus.set($event.value)">
+              @for (opt of statusOptions; track opt.value) {
+                <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <button
+            mat-flat-button
+            color="primary"
+            type="button"
+            (click)="applyStatus()"
+            [disabled]="statusUpdating() || selectedStatus() === assembly().status">
+            @if (statusUpdating()) {
+              <mat-progress-spinner diameter="18" mode="indeterminate" />
+            } @else {
+              Actualizar
+            }
+          </button>
+        </div>
+      </section>
+      <mat-divider />
+    }
+
+    <section class="agenda-section">
+      <div class="agenda-header">
+        <h3 class="section-title">Agenda</h3>
+        @if (isAdmin()) {
+          <button mat-stroked-button type="button" (click)="toggleAddAgenda()">
+            <mat-icon>{{ showAddAgenda() ? 'expand_less' : 'add' }}</mat-icon>
+            {{ showAddAgenda() ? 'Ocultar formulario' : 'Agregar punto' }}
+          </button>
+        }
+      </div>
+
+      @if (showAddAgenda() && isAdmin()) {
+        <mat-card class="add-card" appearance="outlined">
+          <mat-card-content>
+            <form [formGroup]="addForm" class="add-form">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Título</mat-label>
+                <input matInput formControlName="title" />
+                @if (addForm.controls.title.invalid && addForm.controls.title.touched) {
+                  <mat-error>Requerido</mat-error>
+                }
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Descripción (opcional)</mat-label>
+                <textarea matInput rows="2" formControlName="description"></textarea>
+              </mat-form-field>
+              <mat-checkbox formControlName="requiresVote">Requiere votación</mat-checkbox>
+
+              @if (addForm.controls.requiresVote.value) {
+                <div class="vote-options-builder">
+                  <p class="vote-builder-label">Opciones de voto</p>
+                  <div class="existing-options">
+                    @for (opt of pendingVoteOptions(); track opt; let i = $index) {
+                      <mat-chip-set>
+                        <mat-chip [removable]="true" (removed)="removeVoteOption(i)">
+                          {{ opt }}
+                          <mat-icon matChipRemove>cancel</mat-icon>
+                        </mat-chip>
+                      </mat-chip-set>
+                    }
+                  </div>
+                  <div class="add-option-row">
+                    <mat-form-field appearance="outline" class="option-field">
+                      <mat-label>Nueva opción</mat-label>
+                      <input matInput
+                        [value]="newOptionText()"
+                        (input)="newOptionText.set($any($event.target).value)"
+                        (keydown.enter)="$event.preventDefault(); addVoteOption()"
+                        placeholder="Ej: A favor, En contra..." />
+                    </mat-form-field>
+                    <button mat-icon-button type="button" color="primary" (click)="addVoteOption()"
+                      [disabled]="!newOptionText().trim()">
+                      <mat-icon>add_circle</mat-icon>
+                    </button>
+                  </div>
+                  @if (pendingVoteOptions().length < 2) {
+                    <p class="hint-text">Agregue al menos 2 opciones de voto</p>
+                  }
+
+                  <mat-divider class="timer-divider" />
+                  <p class="vote-builder-label">Temporizador de votación (opcional)</p>
+                  <mat-form-field appearance="outline" class="timer-field">
+                    <mat-label>Duración en segundos</mat-label>
+                    <input matInput type="number" formControlName="voteDurationSeconds"
+                      min="10" placeholder="Ej: 60, 120, 300..." />
+                    <mat-hint>Dejar vacío para votación sin límite de tiempo</mat-hint>
+                  </mat-form-field>
+                </div>
+              }
+
+              <div class="add-actions">
+                <button mat-button type="button" (click)="toggleAddAgenda()">Cancelar</button>
+                <button
+                  mat-flat-button
+                  color="primary"
+                  type="button"
+                  (click)="submitAddAgenda()"
+                  [disabled]="addAgendaSubmitting() || addForm.invalid">
+                  @if (addAgendaSubmitting()) {
+                    <mat-progress-spinner diameter="18" mode="indeterminate" />
+                  } @else {
+                    Guardar
+                  }
+                </button>
+              </div>
+            </form>
+          </mat-card-content>
+        </mat-card>
+      }
+
+      @if (!agendaItems().length) {
+        <p class="muted">No hay puntos de agenda todavía.</p>
+      } @else {
+        <div class="agenda-list">
+          @for (item of agendaItems(); track item.id) {
+            <mat-card class="agenda-card" appearance="outlined">
+              <mat-card-header>
+                <mat-card-title>{{ item.title }}</mat-card-title>
+                <mat-card-subtitle>
+                  @if (item.proposedByName) {
+                    <span>Propuesto por {{ item.proposedByName }}</span>
+                  }
+                </mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                @if (item.description) {
+                  <p class="desc">{{ item.description }}</p>
+                }
+                <div class="badges">
+                  <mat-chip-set>
+                    @if (item.requiresVote) {
+                      <mat-chip color="accent">Votación</mat-chip>
+                    } @else {
+                      <mat-chip>Informativo</mat-chip>
+                    }
+                  </mat-chip-set>
+                </div>
+
+                @if (item.requiresVote && item.voteOptions?.length) {
+                  <div class="vote-block">
+
+                    <!-- Timer status banner -->
+                    @if (item.voteDurationSeconds) {
+                      <div class="timer-banner"
+                        [class.timer-waiting]="isVotingNotStarted(item)"
+                        [class.timer-active]="isVotingOpen(item) && item.voteStartedAt"
+                        [class.timer-expired]="!isVotingOpen(item) && item.voteStartedAt">
+                        <mat-icon>timer</mat-icon>
+                        @if (isVotingNotStarted(item)) {
+                          <span>Votación con temporizador: <strong>{{ item.voteDurationSeconds }}s</strong> — Esperando inicio</span>
+                          @if (isAdmin()) {
+                            <button mat-flat-button color="accent" type="button" (click)="startVoting(item.id)" class="start-vote-btn">
+                              <mat-icon>play_arrow</mat-icon> Iniciar votación
+                            </button>
+                          }
+                        } @else if (isVotingOpen(item)) {
+                          <span class="countdown-text">Tiempo restante: <strong>{{ formatCountdown(countdowns()[item.id]) }}</strong></span>
+                          <mat-progress-bar
+                            mode="determinate"
+                            [value]="countdowns()[item.id] / item.voteDurationSeconds * 100"
+                            color="accent"
+                            class="timer-bar">
+                          </mat-progress-bar>
+                        } @else {
+                          <span><strong>Votación cerrada</strong> — El tiempo ha finalizado</span>
+                        }
+                      </div>
+                    }
+
+                    <!-- Participation & Quorum indicator -->
+                    <div class="participation-section">
+                      <div class="participation-header">
+                        <span class="participation-label">
+                          Participación: <strong>{{ voteResultsFor(item).totalVotes }}</strong> votos de <strong>{{ voteResultsFor(item).totalUnits }}</strong> unidades
+                          ({{ voteResultsFor(item).participationPercent }}%)
+                        </span>
+                        @if (voteResultsFor(item).totalVotes > 0) {
+                          <span class="quorum-badge" [class.quorum-ok]="voteResultsFor(item).hasQuorum" [class.quorum-fail]="!voteResultsFor(item).hasQuorum">
+                            <mat-icon>{{ voteResultsFor(item).hasQuorum ? 'verified' : 'warning' }}</mat-icon>
+                            {{ voteResultsFor(item).hasQuorum ? 'Quórum alcanzado' : 'Sin quórum (' + voteResultsFor(item).quorumRequired + '% req.)' }}
+                          </span>
+                        }
+                      </div>
+                      <mat-progress-bar
+                        mode="determinate"
+                        [value]="voteResultsFor(item).participationPercent"
+                        [color]="voteResultsFor(item).hasQuorum ? 'primary' : 'warn'"
+                        class="participation-bar">
+                      </mat-progress-bar>
+                    </div>
+
+                    <!-- Vote results bars -->
+                    <p class="vote-counts-label">Resultados de votación</p>
+                    <div class="vote-results-list">
+                      @for (opt of voteResultsFor(item).options; track opt.value) {
+                        <div class="vote-result-row">
+                          <div class="vote-result-header">
+                            <span class="vote-option-name" [class.winner]="opt.isWinner && voteResultsFor(item).totalVotes > 0">
+                              @if (opt.isWinner && voteResultsFor(item).totalVotes > 0) {
+                                <mat-icon class="winner-icon">emoji_events</mat-icon>
+                              }
+                              {{ opt.value }}
+                            </span>
+                            <span class="vote-option-stats">
+                              {{ opt.count }} voto{{ opt.count !== 1 ? 's' : '' }} · {{ opt.percent }}%
+                            </span>
+                          </div>
+                          <div class="vote-bar-track">
+                            <div class="vote-bar-fill"
+                              [class.winner-bar]="opt.isWinner && voteResultsFor(item).totalVotes > 0"
+                              [style.width.%]="opt.percent">
+                            </div>
+                          </div>
+                        </div>
+                      }
+                    </div>
+
+                    <!-- Validity summary -->
+                    @if (voteResultsFor(item).totalVotes > 0) {
+                      <div class="vote-validity" [class.valid]="voteResultsFor(item).hasQuorum" [class.invalid]="!voteResultsFor(item).hasQuorum">
+                        <mat-icon>{{ voteResultsFor(item).hasQuorum ? 'gavel' : 'block' }}</mat-icon>
+                        @if (voteResultsFor(item).hasQuorum) {
+                          @if (voteResultsFor(item).winnerOption) {
+                            <span>Votación <strong>válida</strong> — Resultado: <strong>{{ voteResultsFor(item).winnerOption }}</strong></span>
+                          } @else {
+                            <span>Votación <strong>válida</strong> — <strong>Empate</strong> entre opciones</span>
+                          }
+                        } @else {
+                          <span>Votación <strong>no válida</strong> — No se alcanzó el quórum mínimo de {{ voteResultsFor(item).quorumRequired }}%</span>
+                        }
+                      </div>
+                    }
+
+                    <!-- Admin: reset voting -->
+                    @if (isAdmin()) {
+                      <div class="admin-vote-actions">
+                        <button mat-stroked-button color="warn" type="button" (click)="resetVoting(item.id)">
+                          <mat-icon>restart_alt</mat-icon> Reiniciar votación
+                        </button>
+                      </div>
+                    }
+
+                    <!-- Resident vote action -->
+                    @if (isResident() && isRegisteredAttendee()) {
+                      @if (hasVoted(item.id)) {
+                        <div class="already-voted">
+                          <mat-icon>check_circle</mat-icon>
+                          <span>Ya votaste: <strong>{{ myVoteFor(item.id) }}</strong></span>
+                        </div>
+                      } @else if (isVotingOpen(item)) {
+                        <div class="vote-actions">
+                          <mat-form-field appearance="outline" class="vote-select">
+                            <mat-label>Su voto</mat-label>
+                            <mat-select
+                              [value]="voteChoice()[item.id]"
+                              (selectionChange)="pickVote(item.id, $event.value)">
+                              @for (opt of getVoteOptionsFor(item); track opt) {
+                                <mat-option [value]="opt">{{ opt }}</mat-option>
+                              }
+                            </mat-select>
+                          </mat-form-field>
+                          <button
+                            mat-flat-button
+                            color="primary"
+                            type="button"
+                            (click)="submitVote(item.id)"
+                            [disabled]="votingItemId() === item.id || !voteChoice()[item.id]">
+                            @if (votingItemId() === item.id) {
+                              <mat-progress-spinner diameter="18" mode="indeterminate" />
+                            } @else {
+                              Votar
+                            }
+                          </button>
+                        </div>
+                      } @else if (isVotingNotStarted(item)) {
+                        <div class="vote-waiting-msg">
+                          <mat-icon>hourglass_empty</mat-icon>
+                          <span>La votación aún no ha iniciado. Espere a que el administrador la inicie.</span>
+                        </div>
+                      } @else {
+                        <div class="vote-closed-msg">
+                          <mat-icon>lock</mat-icon>
+                          <span>La votación ha finalizado.</span>
+                        </div>
+                      }
+                    }
+                  </div>
+                }
+              </mat-card-content>
+            </mat-card>
+          }
+        </div>
+      }
+    </section>
+  }
+
+  @if (loadError()) {
+    <p class="error-text">{{ loadError() }}</p>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="close()">Cerrar</button>
+</mat-dialog-actions>

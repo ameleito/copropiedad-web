@@ -1,0 +1,99 @@
+<h2 mat-dialog-title>
+  <mat-icon class="dialog-icon">report_problem</mat-icon>
+  Detalle del incidente
+</h2>
+
+<mat-dialog-content class="detail-body">
+  <div class="status-row">
+    <mat-chip-set>
+      @if (data.resolved) {
+        <mat-chip color="primary">
+          Resuelto
+          @if (data.resolvedAt) {
+            <span class="chip-date"> · {{ data.resolvedAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+          }
+        </mat-chip>
+      } @else {
+        <mat-chip color="warn">Abierto</mat-chip>
+      }
+      <mat-chip [color]="severityChipColor(data.severity)">{{ severityLabel(data.severity) }}</mat-chip>
+    </mat-chip-set>
+  </div>
+
+  <h3 class="detail-title">{{ data.title }}</h3>
+
+  <dl class="detail-grid">
+    <dt>Reportado por</dt>
+    <dd>{{ data.reportedByName }}</dd>
+
+    <dt>Fecha de reporte</dt>
+    <dd>{{ data.createdAt | date: 'dd/MM/yyyy HH:mm' }}</dd>
+
+    <dt>Ubicación</dt>
+    <dd>{{ data.location ?? '—' }}</dd>
+  </dl>
+
+  <mat-divider />
+
+  <section class="section">
+    <h4 class="section-title">Descripción</h4>
+    <p class="section-text">{{ data.description }}</p>
+  </section>
+
+  @if (data.photoUrl) {
+    <section class="section">
+      <h4 class="section-title">Fotografía</h4>
+      <img [src]="data.photoUrl" alt="Evidencia del incidente" class="photo" />
+    </section>
+  }
+
+  @if (data.resolved && data.resolutionNotes) {
+    <section class="section">
+      <h4 class="section-title">Notas de resolución</h4>
+      <p class="section-text">{{ data.resolutionNotes }}</p>
+    </section>
+  }
+
+  @if (canResolve()) {
+    <mat-card appearance="outlined" class="resolve-card">
+      <mat-card-title>Resolver</mat-card-title>
+      <mat-card-content>
+        <form [formGroup]="resolveForm" (ngSubmit)="submitResolve()" id="resolve-form">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Notas de resolución</mat-label>
+            <textarea matInput formControlName="resolutionNotes" rows="3"></textarea>
+            @if (
+              resolveForm.controls.resolutionNotes.touched && resolveForm.controls.resolutionNotes.hasError('required')
+            ) {
+              <mat-error>Este campo es obligatorio</mat-error>
+            }
+          </mat-form-field>
+          @if (resolveError()) {
+            <p class="error-msg">
+              <mat-icon inline color="warn">error</mat-icon>
+              {{ resolveError() }}
+            </p>
+          }
+        </form>
+      </mat-card-content>
+      <mat-card-actions align="end">
+        <button
+          mat-flat-button
+          color="primary"
+          type="submit"
+          form="resolve-form"
+          [disabled]="resolving()">
+          @if (resolving()) {
+            <mat-progress-spinner diameter="20" mode="indeterminate" />
+          } @else {
+            Marcar como resuelto
+          }
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="close()">Cerrar</button>
+</mat-dialog-actions>

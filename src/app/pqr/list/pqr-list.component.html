@@ -1,0 +1,173 @@
+<div class="pqr-list-page">
+  <header class="page-header">
+    <div class="title-row">
+      <h1 class="page-title" matBadge="{{ totalElements() }}" matBadgeOverlap="false" [matBadgeHidden]="totalElements() === 0">
+        <mat-icon aria-hidden="true" class="title-icon">assignment</mat-icon>
+        Solicitudes PQR
+      </h1>
+      <button mat-icon-button type="button" [matMenuTriggerFor]="helpMenu" aria-label="Más opciones">
+        <mat-icon>more_vert</mat-icon>
+      </button>
+      <mat-menu #helpMenu="matMenu">
+        <button mat-menu-item type="button" disabled>
+          <mat-icon>info</mat-icon>
+          <span>Radique peticiones, quejas o reclamos desde el botón +</span>
+        </button>
+      </mat-menu>
+    </div>
+
+    <mat-chip-set class="filter-chips" aria-label="Filtrar por estado">
+      @for (chip of filterChips; track chip.value) {
+        <mat-chip
+          [highlighted]="chipActive(chip.value)"
+          (click)="setStatusFilter(chip.value)"
+          (keydown.enter)="setStatusFilter(chip.value)"
+          tabindex="0"
+          role="button"
+        >
+          {{ chip.label }}
+        </mat-chip>
+      }
+    </mat-chip-set>
+
+    <div class="toolbar-row">
+      <mat-form-field appearance="outline" class="page-size-field" subscriptSizing="dynamic">
+        <mat-label>Resultados por página</mat-label>
+        <mat-select [value]="pageSize()" (selectionChange)="onPageSizeSelect($event.value)">
+          @for (s of [10, 20, 50]; track s) {
+            <mat-option [value]="s">{{ s }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </header>
+
+  @if (loadError()) {
+    <mat-card class="error-banner" appearance="outlined">
+      <mat-card-content>
+        <mat-icon color="warn">error_outline</mat-icon>
+        <span>{{ loadError() }}</span>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  @if (loading()) {
+    <div class="loading-wrap" aria-busy="true" aria-live="polite">
+      <mat-progress-spinner mode="indeterminate" diameter="48" />
+      <span>Cargando solicitudes…</span>
+    </div>
+  } @else if (!items().length) {
+    <div class="empty-state" role="status">
+      <mat-icon class="empty-icon">inbox</mat-icon>
+      <p class="empty-title">No hay solicitudes</p>
+      <p class="empty-hint">Cuando existan PQR en esta copropiedad, aparecerán aquí.</p>
+    </div>
+  } @else {
+    <div class="card-grid">
+      @for (pqr of items(); track pqr.id) {
+        <mat-card
+          class="pqr-card"
+          [style.border-left-color]="statusColors[pqr.status]"
+          appearance="outlined"
+          (click)="openCard(pqr)"
+          (keydown.enter)="openCard(pqr)"
+          tabindex="0"
+          role="link"
+        >
+          <mat-card-header class="card-header">
+            <div class="header-top">
+              <span class="tipo-badge">{{ labels.tipo[pqr.tipo] }}</span>
+              <button
+                mat-icon-button
+                type="button"
+                class="card-menu-trigger"
+                (click)="$event.stopPropagation()"
+                [matMenuTriggerFor]="cardMenu"
+                aria-label="Menú de la solicitud"
+              >
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #cardMenu="matMenu">
+                <a mat-menu-item [routerLink]="['/pqr', pqr.id]" (click)="$event.stopPropagation()">
+                  <mat-icon>open_in_new</mat-icon>
+                  Ver detalle
+                </a>
+              </mat-menu>
+            </div>
+            <mat-card-title class="card-title">{{ pqr.title }}</mat-card-title>
+            <mat-card-subtitle>{{ labels.category[pqr.category] }}</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="meta-row">
+              <mat-chip-set class="status-chip-set">
+                <mat-chip class="status-chip" [ngStyle]="statusChipStyle(pqr.status)">
+                  {{ labels.status[pqr.status] }}
+                </mat-chip>
+              </mat-chip-set>
+              <span class="priority-badge" [attr.data-priority]="pqr.priority">
+                {{ labels.priority[pqr.priority] }}
+              </span>
+            </div>
+            <div class="info-row">
+              <mat-icon inline>apartment</mat-icon>
+              <span>Unidad {{ pqr.unitNumber }}</span>
+            </div>
+            <div class="info-row">
+              <mat-icon inline>event</mat-icon>
+              <span>Creado: {{ pqr.createdAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+            <div class="sla-row" [class.sla-breached]="pqr.slaBreached">
+              <mat-icon>{{ pqr.slaBreached ? 'warning' : 'schedule' }}</mat-icon>
+              <span>
+                @if (pqr.slaBreached) {
+                  <strong>SLA vencido</strong>
+                  — límite {{ pqr.slaDeadline | date: 'dd/MM/yyyy HH:mm' }}
+                } @else {
+                  SLA: vence {{ pqr.slaDeadline | date: 'dd/MM/yyyy HH:mm' }} ({{ pqr.slaHours }} h)
+                }
+              </span>
+            </div>
+
+            @if (isResident()) {
+              <div class="mini-timeline" (click)="$event.stopPropagation()">
+                <span class="timeline-label">Avance</span>
+                <div class="timeline-track">
+                  @for (step of timelineSteps(pqr); track step; let i = $index) {
+                    <div class="timeline-step" [class.active]="isTimelineActive(pqr, step)" [class.last]="i === timelineSteps(pqr).length - 1">
+                      <span class="dot"></span>
+                      @if (i < timelineSteps(pqr).length - 1) {
+                        <span class="line"></span>
+                      }
+                    </div>
+                  }
+                </div>
+                <div class="timeline-captions">
+                  @for (step of timelineSteps(pqr); track step) {
+                    <span class="caption" [class.active]="isTimelineActive(pqr, step)">{{ labels.status[step] }}</span>
+                  }
+                </div>
+              </div>
+            }
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+  }
+
+  <mat-paginator
+    class="paginator"
+    [length]="totalElements()"
+    [pageIndex]="pageIndex()"
+    [pageSize]="pageSize()"
+    [pageSizeOptions]="[10, 20, 50]"
+    showFirstLastButtons
+    aria-label="Seleccionar página de solicitudes"
+    (page)="onPage($event)"
+  />
+</div>
+
+@if (showFab()) {
+  <button mat-fab class="fab-create" type="button" color="primary" (click)="createNew()" aria-label="Nueva solicitud PQR">
+    <mat-icon>add</mat-icon>
+  </button>
+}

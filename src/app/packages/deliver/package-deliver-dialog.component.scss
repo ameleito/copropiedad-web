@@ -1,0 +1,27 @@
+.dialog-form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 340px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.warn-text {
+  color: #f57f17;
+  font-size: 0.85rem;
+}
+
+.error-banner {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(244, 67, 54, 0.1);
+  color: #b71c1c;
+  margin-bottom: 12px;
+  font-size: 0.875rem;
+}

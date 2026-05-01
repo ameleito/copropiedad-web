@@ -1,0 +1,92 @@
+.dialog-icon {
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+.detail-body {
+  min-width: 280px;
+}
+
+.status-row {
+  margin-bottom: 12px;
+}
+
+.chip-date {
+  font-weight: 400;
+  opacity: 0.9;
+}
+
+.detail-title {
+  margin: 0 0 16px;
+  font-size: 1.15rem;
+  font-weight: 500;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 16px;
+  margin: 0 0 16px;
+  font-size: 0.9rem;
+}
+
+.detail-grid dt {
+  margin: 0;
+  color: rgba(0, 0, 0, 0.6);
+  font-weight: 500;
+}
+
+.detail-grid dd {
+  margin: 0;
+}
+
+.section {
+  margin: 16px 0;
+}
+
+.section-title {
+  margin: 0 0 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.65);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.section-text {
+  margin: 0;
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+
+.photo {
+  max-width: 100%;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.resolve-card {
+  margin-top: 20px;
+}
+
+.resolve-card mat-card-title {
+  font-size: 1rem;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.error-msg {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #d32f2f;
+  font-size: 0.85rem;
+  margin: 8px 0 0;
+}
+
+mat-card-actions button mat-progress-spinner {
+  display: inline-block;
+  vertical-align: middle;
+}

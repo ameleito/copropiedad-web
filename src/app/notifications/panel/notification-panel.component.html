@@ -1,0 +1,35 @@
+<div class="panel-header">
+  <span class="panel-title">Notificaciones</span>
+  @if (notifications.length > 0) {
+    <button mat-button color="primary" (click)="markAllRead()" class="mark-all-btn">
+      Marcar todas como leídas
+    </button>
+  }
+</div>
+
+<mat-divider></mat-divider>
+
+@if (loading) {
+  <div class="loading-container">
+    <mat-spinner diameter="32"></mat-spinner>
+  </div>
+} @else if (notifications.length === 0) {
+  <div class="empty-state">
+    <mat-icon class="empty-icon">notifications_none</mat-icon>
+    <p>No tienes notificaciones</p>
+  </div>
+} @else {
+  <mat-nav-list class="notification-list">
+    @for (notif of notifications; track notif.id) {
+      <mat-list-item
+        class="notif-item"
+        [class.unread]="!notif.read"
+        (click)="markAsRead(notif)">
+        <mat-icon matListItemIcon class="notif-type-icon">{{ iconForType(notif.type) }}</mat-icon>
+        <div matListItemTitle class="notif-title">{{ notif.title }}</div>
+        <div matListItemLine class="notif-body">{{ notif.body }}</div>
+        <div matListItemMeta class="notif-time">{{ timeAgo(notif.createdAt) }}</div>
+      </mat-list-item>
+    }
+  </mat-nav-list>
+}
