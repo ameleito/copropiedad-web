@@ -6,6 +6,7 @@ export interface PackageResponse {
   unitId: string;
   unitNumber: string;
   towerName: string | null;
+  interiorName: string | null;
   courier: string | null;
   recipientName: string | null;
   description: string | null;

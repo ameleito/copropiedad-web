@@ -1,0 +1,92 @@
+<div class="page">
+  <header class="page-header">
+    <div class="title-row">
+      <h1 class="page-title">
+        <mat-icon class="title-icon">meeting_room</mat-icon>
+        Gestión de Interiores
+      </h1>
+      <button mat-flat-button color="primary" (click)="openCreate()">
+        <mat-icon>add</mat-icon>
+        Nuevo Interior
+      </button>
+    </div>
+
+    <form [formGroup]="filterForm" class="filter-bar">
+      <mat-form-field appearance="outline" class="filter-tower">
+        <mat-label>Filtrar por torre</mat-label>
+        <mat-select formControlName="tower">
+          <mat-option value="ALL">Todas las torres</mat-option>
+          <mat-option value="NONE">Sin torre</mat-option>
+          @for (t of towers(); track t.id) {
+            <mat-option [value]="t.id">{{ t.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </form>
+  </header>
+
+  @if (loading()) {
+    <div class="loading-wrap">
+      <mat-progress-spinner mode="indeterminate" diameter="48" />
+      <span>Cargando interiores…</span>
+    </div>
+  } @else if (!filteredInteriors().length) {
+    <div class="empty-state">
+      <mat-icon class="empty-icon">meeting_room</mat-icon>
+      <p class="empty-title">No hay interiores registrados</p>
+      <p class="empty-hint">Haz clic en "Nuevo Interior" para agregar el primero.</p>
+    </div>
+  } @else {
+    <mat-card appearance="outlined">
+      <table mat-table [dataSource]="filteredInteriors()" class="data-table">
+
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Nombre</th>
+          <td mat-cell *matCellDef="let i">
+            <span class="item-name">{{ i.name }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="tower">
+          <th mat-header-cell *matHeaderCellDef>Torre</th>
+          <td mat-cell *matCellDef="let i">
+            @if (i.towerName) {
+              <mat-chip-set>
+                <mat-chip>
+                  <mat-icon matChipAvatar>location_city</mat-icon>
+                  {{ i.towerName }}
+                </mat-chip>
+              </mat-chip-set>
+            } @else {
+              <span class="no-value">Sin torre</span>
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let i" class="actions-cell">
+            <button mat-icon-button color="primary" (click)="openEdit(i)" matTooltip="Editar interior">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button
+              mat-icon-button color="warn"
+              (click)="delete(i)"
+              [disabled]="deletingId() === i.id"
+              matTooltip="Eliminar interior">
+              @if (deletingId() === i.id) {
+                <mat-progress-spinner diameter="20" mode="indeterminate" />
+              } @else {
+                <mat-icon>delete</mat-icon>
+              }
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    </mat-card>
+    <p class="count">{{ filteredInteriors().length }} interior(es)</p>
+  }
+</div>

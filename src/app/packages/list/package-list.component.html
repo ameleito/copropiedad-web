@@ -80,7 +80,10 @@
               <mat-icon>{{ icons[pkg.status] }}</mat-icon>
             </div>
             <mat-card-title>Apto {{ pkg.unitNumber }}</mat-card-title>
-            <mat-card-subtitle>{{ pkg.towerName ?? 'Sin torre' }}</mat-card-subtitle>
+            <mat-card-subtitle>
+              {{ pkg.towerName ?? 'Sin torre' }}
+              @if (pkg.interiorName) { · {{ pkg.interiorName }} }
+            </mat-card-subtitle>
           </mat-card-header>
 
           <mat-card-content>

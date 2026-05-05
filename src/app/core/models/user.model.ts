@@ -18,6 +18,8 @@ export interface UserProfile {
   buildingName: string;
   unitId?: string;
   unitNumber?: string;
+  towerName?: string | null;
+  interiorName?: string | null;
   whatsappOptIn: boolean;
   pushOptIn: boolean;
   quietHoursStart?: string;

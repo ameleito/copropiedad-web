@@ -30,7 +30,12 @@ const NAV_ITEMS: NavItem[] = [
   { icon: 'report_problem', label: 'Incidentes', route: '/incidents' },
   { icon: 'forum', label: 'Mensajes', route: '/messaging' },
   { icon: 'notifications', label: 'Notificaciones', route: '/notifications' },
+  { icon: 'home', label: 'Mi Unidad', route: '/my-unit', roles: ['RESIDENT'] },
   { icon: 'group', label: 'Gestión de Usuarios', route: '/admin/users', roles: ['ADMIN'] },
+  { icon: 'people', label: 'Residentes', route: '/admin/residents', roles: ['ADMIN'] },
+  { icon: 'apartment', label: 'Gestión de Unidades', route: '/admin/units', roles: ['ADMIN'] },
+  { icon: 'location_city', label: 'Gestión de Torres', route: '/admin/towers', roles: ['ADMIN'] },
+  { icon: 'meeting_room', label: 'Gestión de Interiores', route: '/admin/interiors', roles: ['ADMIN'] },
 ];
 
 @Component({

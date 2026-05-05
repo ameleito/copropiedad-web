@@ -1,5 +1,4 @@
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -10,15 +9,13 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { environment } from '../../../environments/environment';
-import { ApiResponse } from '../../core/models/auth.model';
+import {
+  BuildingService,
+  PublicInterior,
+  PublicTower,
+  PublicUnit,
+} from '../../core/services/building.service';
 import { AnnouncementService } from '../services/announcement.service';
-
-const SEED_BUILDING_ID = 'a0000000-0000-0000-0000-000000000001';
-
-interface TowerOption { id: string; name: string; totalFloors: number; }
-interface UnitOption { id: string; number: string; floor: number | null; towerName: string | null; }
-interface TorreGroup { name: string; towers: TowerOption[]; }
 
 @Component({
   selector: 'app-announcement-create-dialog',
@@ -40,7 +37,7 @@ interface TorreGroup { name: string; towers: TowerOption[]; }
 })
 export class AnnouncementCreateDialogComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
-  private readonly http = inject(HttpClient);
+  private readonly buildingService = inject(BuildingService);
   private readonly dialogRef = inject(MatDialogRef<AnnouncementCreateDialogComponent>);
   private readonly announcementService = inject(AnnouncementService);
 
@@ -61,21 +58,18 @@ export class AnnouncementCreateDialogComponent implements OnInit {
     { value: 'UNIT', label: 'Unidad específica', icon: 'door_front' },
   ];
 
-  readonly towers = signal<TowerOption[]>([]);
-  readonly allUnits = signal<UnitOption[]>([]);
-  readonly torreGroups = signal<TorreGroup[]>([]);
-  readonly interiorsForTorre = signal<TowerOption[]>([]);
-  readonly filteredUnits = signal<UnitOption[]>([]);
+  readonly towers = signal<PublicTower[]>([]);
+  readonly interiors = signal<PublicInterior[]>([]);
+  readonly filteredUnits = signal<PublicUnit[]>([]);
   readonly floorOptions = signal<number[]>([]);
 
-  selectedTorre = '';
   selectedTowerId = '';
+  selectedInteriorId = '';
   selectedFloor = '';
   selectedUnitId = '';
 
   ngOnInit(): void {
-    this.loadTowers();
-    this.loadUnits();
+    this.buildingService.towers().subscribe({ next: (t) => this.towers.set(t) });
   }
 
   get currentScope(): string {
@@ -83,31 +77,42 @@ export class AnnouncementCreateDialogComponent implements OnInit {
   }
 
   onScopeChange(): void {
-    this.selectedTorre = '';
     this.selectedTowerId = '';
+    this.selectedInteriorId = '';
     this.selectedFloor = '';
     this.selectedUnitId = '';
-    this.interiorsForTorre.set([]);
+    this.interiors.set([]);
     this.filteredUnits.set([]);
     this.floorOptions.set([]);
   }
 
-  onTorreChange(torre: string): void {
-    this.selectedTorre = torre;
-    this.selectedTowerId = '';
-    this.selectedFloor = '';
-    this.selectedUnitId = '';
-    const group = this.torreGroups().find(g => g.name === torre);
-    this.interiorsForTorre.set(group?.towers ?? []);
-    this.filteredUnits.set([]);
-    this.floorOptions.set([]);
-  }
-
-  onInteriorChange(towerId: string): void {
+  onTowerChange(towerId: string): void {
     this.selectedTowerId = towerId;
+    this.selectedInteriorId = '';
     this.selectedFloor = '';
     this.selectedUnitId = '';
-    const tower = this.towers().find(t => t.id === towerId);
+    this.filteredUnits.set([]);
+    this.floorOptions.set([]);
+
+    this.buildingService.interiors(towerId).subscribe({
+      next: (interiors) => {
+        this.interiors.set(interiors);
+        if (interiors.length === 0) {
+          this.onInteriorResolved(towerId, null);
+        }
+      },
+    });
+  }
+
+  onInteriorChange(interiorId: string): void {
+    this.selectedInteriorId = interiorId;
+    this.selectedFloor = '';
+    this.selectedUnitId = '';
+    this.onInteriorResolved(null, interiorId);
+  }
+
+  private onInteriorResolved(towerId: string | null, interiorId: string | null): void {
+    const tower = this.towers().find(t => t.id === (towerId ?? this.selectedTowerId));
 
     if (this.currentScope === 'FLOOR') {
       const floors: number[] = [];
@@ -116,20 +121,15 @@ export class AnnouncementCreateDialogComponent implements OnInit {
     }
 
     if (this.currentScope === 'UNIT') {
-      this.filteredUnits.set(
-        this.allUnits()
-          .filter(u => tower && u.towerName === tower.name)
-          .sort((a, b) => {
-            const fd = (a.floor ?? 0) - (b.floor ?? 0);
-            return fd !== 0 ? fd : parseInt(a.number) - parseInt(b.number);
-          }),
-      );
+      this.buildingService.units(towerId, interiorId).subscribe({
+        next: (u) => this.filteredUnits.set(u),
+      });
     }
   }
 
   get scopeValue(): string {
     switch (this.currentScope) {
-      case 'TOWER': return this.selectedTowerId;
+      case 'TOWER': return this.selectedInteriorId || this.selectedTowerId;
       case 'FLOOR': return this.selectedFloor;
       case 'UNIT': return this.selectedUnitId;
       default: return '';
@@ -165,38 +165,5 @@ export class AnnouncementCreateDialogComponent implements OnInit {
       });
   }
 
-  private loadTowers(): void {
-    this.http
-      .get<ApiResponse<TowerOption[]>>(
-        `${environment.apiUrl}/api/public/buildings/${SEED_BUILDING_ID}/towers`,
-      )
-      .subscribe({
-        next: (res) => {
-          const data = res.data ?? [];
-          this.towers.set(data);
-          const groups = new Map<string, TowerOption[]>();
-          for (const t of data) {
-            const match = t.name.match(/^(Torre \d+)/);
-            const key = match ? match[1] : t.name;
-            if (!groups.has(key)) groups.set(key, []);
-            groups.get(key)!.push(t);
-          }
-          this.torreGroups.set(
-            Array.from(groups.entries())
-              .sort(([a], [b]) => a.localeCompare(b, undefined, { numeric: true }))
-              .map(([name, towers]) => ({ name, towers })),
-          );
-        },
-      });
-  }
-
-  private loadUnits(): void {
-    this.http
-      .get<ApiResponse<UnitOption[]>>(
-        `${environment.apiUrl}/api/public/buildings/${SEED_BUILDING_ID}/units`,
-      )
-      .subscribe({
-        next: (res) => this.allUnits.set(res.data ?? []),
-      });
-  }
 }
+

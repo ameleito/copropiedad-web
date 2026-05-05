@@ -33,76 +33,52 @@
     @if (currentScope === 'TOWER' || currentScope === 'FLOOR' || currentScope === 'UNIT') {
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Torre</mat-label>
-        <mat-select [value]="selectedTorre" (selectionChange)="onTorreChange($event.value)">
-          @for (g of torreGroups(); track g.name) {
-            <mat-option [value]="g.name">{{ g.name }}</mat-option>
-          }
-        </mat-select>
-        <mat-icon matPrefix>domain</mat-icon>
-      </mat-form-field>
-    }
-
-    <!-- Interior selector (for TOWER scope when torre has multiple interiors) -->
-    @if (currentScope === 'TOWER' && selectedTorre && interiorsForTorre().length > 0) {
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Interior</mat-label>
-        <mat-select [value]="selectedTowerId" (selectionChange)="selectedTowerId = $event.value">
-          @for (t of interiorsForTorre(); track t.id) {
+        <mat-icon matPrefix>location_city</mat-icon>
+        <mat-select [value]="selectedTowerId" (selectionChange)="onTowerChange($event.value)">
+          @for (t of towers(); track t.id) {
             <mat-option [value]="t.id">{{ t.name }}</mat-option>
           }
         </mat-select>
-        <mat-icon matPrefix>meeting_room</mat-icon>
       </mat-form-field>
     }
 
-    <!-- Interior + Floor selector (for FLOOR scope) -->
-    @if (currentScope === 'FLOOR' && selectedTorre && interiorsForTorre().length > 0) {
+    <!-- Interior selector -->
+    @if ((currentScope === 'TOWER' || currentScope === 'FLOOR' || currentScope === 'UNIT') && selectedTowerId && interiors().length > 0) {
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Interior</mat-label>
-        <mat-select [value]="selectedTowerId" (selectionChange)="onInteriorChange($event.value)">
-          @for (t of interiorsForTorre(); track t.id) {
-            <mat-option [value]="t.id">{{ t.name }}</mat-option>
+        <mat-label>Interior (opcional)</mat-label>
+        <mat-icon matPrefix>meeting_room</mat-icon>
+        <mat-select [value]="selectedInteriorId" (selectionChange)="onInteriorChange($event.value)">
+          @for (i of interiors(); track i.id) {
+            <mat-option [value]="i.id">{{ i.name }}</mat-option>
           }
         </mat-select>
-        <mat-icon matPrefix>meeting_room</mat-icon>
       </mat-form-field>
-
-      @if (selectedTowerId && floorOptions().length > 0) {
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Piso</mat-label>
-          <mat-select [value]="selectedFloor" (selectionChange)="selectedFloor = $event.value">
-            @for (f of floorOptions(); track f) {
-              <mat-option [value]="'' + f">Piso {{ f }}</mat-option>
-            }
-          </mat-select>
-          <mat-icon matPrefix>layers</mat-icon>
-        </mat-form-field>
-      }
     }
 
-    <!-- Interior + Unit selector (for UNIT scope) -->
-    @if (currentScope === 'UNIT' && selectedTorre && interiorsForTorre().length > 0) {
+    <!-- Floor selector (for FLOOR scope) -->
+    @if (currentScope === 'FLOOR' && (selectedInteriorId || (selectedTowerId && interiors().length === 0)) && floorOptions().length > 0) {
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Interior</mat-label>
-        <mat-select [value]="selectedTowerId" (selectionChange)="onInteriorChange($event.value)">
-          @for (t of interiorsForTorre(); track t.id) {
-            <mat-option [value]="t.id">{{ t.name }}</mat-option>
+        <mat-label>Piso</mat-label>
+        <mat-icon matPrefix>layers</mat-icon>
+        <mat-select [value]="selectedFloor" (selectionChange)="selectedFloor = $event.value">
+          @for (f of floorOptions(); track f) {
+            <mat-option [value]="'' + f">Piso {{ f }}</mat-option>
           }
         </mat-select>
-        <mat-icon matPrefix>meeting_room</mat-icon>
       </mat-form-field>
+    }
 
-      @if (selectedTowerId && filteredUnits().length > 0) {
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Apartamento</mat-label>
-          <mat-select [value]="selectedUnitId" (selectionChange)="selectedUnitId = $event.value">
-            @for (u of filteredUnits(); track u.id) {
-              <mat-option [value]="u.id">Apto {{ u.number }}</mat-option>
-            }
-          </mat-select>
-          <mat-icon matPrefix>door_front</mat-icon>
-        </mat-form-field>
-      }
+    <!-- Unit selector (for UNIT scope) -->
+    @if (currentScope === 'UNIT' && filteredUnits().length > 0) {
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Apartamento</mat-label>
+        <mat-icon matPrefix>apartment</mat-icon>
+        <mat-select [value]="selectedUnitId" (selectionChange)="selectedUnitId = $event.value">
+          @for (u of filteredUnits(); track u.id) {
+            <mat-option [value]="u.id">Apto {{ u.number }}{{ u.floor != null ? ' · Piso ' + u.floor : '' }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
     }
 
     <mat-slide-toggle formControlName="sendPush" color="primary">

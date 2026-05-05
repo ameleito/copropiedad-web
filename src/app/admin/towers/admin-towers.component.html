@@ -1,0 +1,68 @@
+<div class="page">
+  <header class="page-header">
+    <div class="title-row">
+      <h1 class="page-title">
+        <mat-icon class="title-icon">location_city</mat-icon>
+        Gestión de Torres
+      </h1>
+      <button mat-flat-button color="primary" (click)="openCreate()">
+        <mat-icon>add</mat-icon>
+        Nueva Torre
+      </button>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <div class="loading-wrap">
+      <mat-progress-spinner mode="indeterminate" diameter="48" />
+      <span>Cargando torres…</span>
+    </div>
+  } @else if (!towers().length) {
+    <div class="empty-state">
+      <mat-icon class="empty-icon">location_city</mat-icon>
+      <p class="empty-title">No hay torres registradas</p>
+      <p class="empty-hint">Haz clic en "Nueva Torre" para agregar la primera.</p>
+    </div>
+  } @else {
+    <mat-card appearance="outlined">
+      <table mat-table [dataSource]="towers()" class="data-table">
+
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Nombre</th>
+          <td mat-cell *matCellDef="let t">
+            <span class="item-name">{{ t.name }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="totalFloors">
+          <th mat-header-cell *matHeaderCellDef>Pisos</th>
+          <td mat-cell *matCellDef="let t">{{ t.totalFloors }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let t" class="actions-cell">
+            <button mat-icon-button color="primary" (click)="openEdit(t)" matTooltip="Editar torre">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button
+              mat-icon-button color="warn"
+              (click)="delete(t)"
+              [disabled]="deletingId() === t.id"
+              matTooltip="Eliminar torre">
+              @if (deletingId() === t.id) {
+                <mat-progress-spinner diameter="20" mode="indeterminate" />
+              } @else {
+                <mat-icon>delete</mat-icon>
+              }
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    </mat-card>
+    <p class="count">{{ towers().length }} torre(s)</p>
+  }
+</div>

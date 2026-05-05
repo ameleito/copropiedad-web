@@ -54,31 +54,34 @@
 
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Torre</mat-label>
-        <mat-select (selectionChange)="onTorreChange($event.value)">
-          @for (g of torreGroups(); track g.name) {
-            <mat-option [value]="g.name">{{ g.name }}</mat-option>
+        <mat-icon matPrefix>location_city</mat-icon>
+        <mat-select (selectionChange)="onTowerChange($event.value)">
+          @for (t of towers(); track t.id) {
+            <mat-option [value]="t.id">{{ t.name }}</mat-option>
           }
         </mat-select>
       </mat-form-field>
 
-      @if (selectedTorre()) {
+      @if (selectedTowerId() && interiors().length > 0) {
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Interior</mat-label>
+          <mat-icon matPrefix>meeting_room</mat-icon>
           <mat-select (selectionChange)="onInteriorChange($event.value)">
-            @for (int of interiorsForTorre(); track int.id) {
-              <mat-option [value]="int.id">{{ int.name }}</mat-option>
+            @for (i of interiors(); track i.id) {
+              <mat-option [value]="i.id">{{ i.name }}</mat-option>
             }
           </mat-select>
         </mat-form-field>
       }
 
-      @if (selectedTowerId()) {
+      @if (units().length > 0) {
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Apartamento</mat-label>
+          <mat-icon matPrefix>apartment</mat-icon>
           <mat-select formControlName="unitId">
-            @for (unit of filteredUnits(); track unit.id) {
-              <mat-option [value]="unit.id">
-                Apto {{ unit.number }} (Piso {{ unit.floor }})
+            @for (u of units(); track u.id) {
+              <mat-option [value]="u.id">
+                Apto {{ u.number }}{{ u.floor != null ? ' · Piso ' + u.floor : '' }}
               </mat-option>
             }
           </mat-select>

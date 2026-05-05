@@ -1,5 +1,10 @@
 import { Routes } from '@angular/router';
 import { AdminUsersComponent } from './admin/users/admin-users.component';
+import { AdminUnitsComponent } from './admin/units/admin-units.component';
+import { AdminTowersComponent } from './admin/towers/admin-towers.component';
+import { AdminInteriorsComponent } from './admin/interiors/admin-interiors.component';
+import { AdminResidentsComponent } from './admin/residents/admin-residents.component';
+import { MyUnitComponent } from './residents/my-unit.component';
 import { LoginComponent } from './auth/login/login.component';
 import { RegisterComponent } from './auth/register/register.component';
 import { authGuard } from './core/guards/auth.guard';
@@ -51,6 +56,11 @@ export const routes: Routes = [
       { path: 'assemblies', component: AssemblyListComponent },
       { path: 'documents', component: DocumentListComponent },
       { path: 'admin/users', component: AdminUsersComponent, canActivate: [roleGuard('ADMIN')] },
+      { path: 'admin/units', component: AdminUnitsComponent, canActivate: [roleGuard('ADMIN')] },
+      { path: 'admin/towers', component: AdminTowersComponent, canActivate: [roleGuard('ADMIN')] },
+      { path: 'admin/interiors', component: AdminInteriorsComponent, canActivate: [roleGuard('ADMIN')] },
+      { path: 'admin/residents', component: AdminResidentsComponent, canActivate: [roleGuard('ADMIN')] },
+      { path: 'my-unit', component: MyUnitComponent, canActivate: [roleGuard('RESIDENT')] },
     ],
   },
   { path: 'auth/login', component: LoginComponent },

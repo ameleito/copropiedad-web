@@ -1,0 +1,86 @@
+<div class="page-container">
+  <header class="page-header">
+    <div class="title-row">
+      <div class="title-info">
+        <h1 class="page-title">
+          <mat-icon class="title-icon">home</mat-icon>
+          Mi Unidad
+        </h1>
+        @if (myProfile(); as p) {
+          @if (p.unitNumber) {
+            <div class="unit-chips">
+              @if (p.towerName) {
+                <span class="loc-chip tower">{{ p.towerName }}</span>
+              }
+              @if (p.interiorName) {
+                <span class="loc-chip interior">{{ p.interiorName }}</span>
+              }
+              <span class="loc-chip unit">Apto {{ p.unitNumber }}</span>
+            </div>
+          }
+        }
+      </div>
+      <button mat-flat-button color="primary" (click)="openAddDialog()">
+        <mat-icon>person_add</mat-icon>
+        Agregar residente
+      </button>
+    </div>
+  </header>
+
+  @if (loadError()) {
+    <mat-card class="error-banner" appearance="outlined">
+      <mat-card-content>
+        <mat-icon color="warn">error_outline</mat-icon>
+        <span>{{ loadError() }}</span>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  @if (loading()) {
+    <div class="loading-wrap">
+      <mat-progress-spinner mode="indeterminate" diameter="48" />
+      <span>Cargando residentes…</span>
+    </div>
+  } @else if (!residents().length) {
+    <div class="empty-state">
+      <mat-icon class="empty-icon">group_off</mat-icon>
+      <p class="empty-title">No hay residentes registrados</p>
+      <p class="empty-hint">Registra a los residentes de tu apartamento con el botón de arriba.</p>
+    </div>
+  } @else {
+    <div class="residents-grid">
+      @for (r of residents(); track r.id) {
+        <mat-card class="resident-card" appearance="outlined">
+          <mat-card-content>
+            <div class="resident-header">
+              <span class="avatar">{{ (r.fullName || '?')[0].toUpperCase() }}</span>
+              <div class="resident-info">
+                <span class="resident-name">{{ r.fullName }}</span>
+                <span class="resident-email">{{ r.email }}</span>
+              </div>
+            </div>
+
+            <div class="resident-details">
+              @if (r.phone) {
+                <div class="detail-row">
+                  <mat-icon inline>phone</mat-icon>
+                  <span>{{ r.phone }}</span>
+                </div>
+              }
+              @if (r.idDocument) {
+                <div class="detail-row">
+                  <mat-icon inline>badge</mat-icon>
+                  <span>{{ r.idDocument }}</span>
+                </div>
+              }
+              <div class="detail-row muted">
+                <mat-icon inline>calendar_today</mat-icon>
+                <span>Registrado {{ r.createdAt | date:'dd/MM/yyyy' }}</span>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+  }
+</div>

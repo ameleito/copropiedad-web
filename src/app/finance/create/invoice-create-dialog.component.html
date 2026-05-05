@@ -6,38 +6,38 @@
 <mat-dialog-content>
   <form [formGroup]="form" (ngSubmit)="submit()" id="inv-form">
 
-    <!-- Unit cascading selector -->
+    <!-- Unit cascading selector: Torre → Interior → Apartamento -->
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Torre</mat-label>
-      <mat-select [value]="selectedTorre" (selectionChange)="onTorreChange($event.value)">
-        @for (g of torreGroups(); track g.name) {
-          <mat-option [value]="g.name">{{ g.name }}</mat-option>
+      <mat-icon matPrefix>location_city</mat-icon>
+      <mat-select [value]="selectedTowerId" (selectionChange)="onTowerChange($event.value)">
+        @for (t of towers(); track t.id) {
+          <mat-option [value]="t.id">{{ t.name }}</mat-option>
         }
       </mat-select>
-      <mat-icon matPrefix>domain</mat-icon>
     </mat-form-field>
 
-    @if (selectedTorre && interiorsForTorre().length > 0) {
+    @if (selectedTowerId && interiors().length > 0) {
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Interior</mat-label>
-        <mat-select [value]="selectedTowerId" (selectionChange)="onInteriorChange($event.value)">
-          @for (t of interiorsForTorre(); track t.id) {
-            <mat-option [value]="t.id">{{ t.name }}</mat-option>
+        <mat-icon matPrefix>meeting_room</mat-icon>
+        <mat-select [value]="selectedInteriorId" (selectionChange)="onInteriorChange($event.value)">
+          @for (i of interiors(); track i.id) {
+            <mat-option [value]="i.id">{{ i.name }}</mat-option>
           }
         </mat-select>
-        <mat-icon matPrefix>meeting_room</mat-icon>
       </mat-form-field>
     }
 
-    @if (selectedTowerId && filteredUnits().length > 0) {
+    @if (filteredUnits().length > 0) {
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Apartamento</mat-label>
+        <mat-icon matPrefix>apartment</mat-icon>
         <mat-select formControlName="unitId">
           @for (u of filteredUnits(); track u.id) {
-            <mat-option [value]="u.id">Apto {{ u.number }}</mat-option>
+            <mat-option [value]="u.id">Apto {{ u.number }}{{ u.floor != null ? ' · Piso ' + u.floor : '' }}</mat-option>
           }
         </mat-select>
-        <mat-icon matPrefix>door_front</mat-icon>
       </mat-form-field>
     }
 
