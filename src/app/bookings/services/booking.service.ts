@@ -75,4 +75,9 @@ export class BookingService {
       .put<ApiResponse<CommonArea>>(`${this.baseUrl}/areas/${id}`, req)
       .pipe(map((res) => res.data));
   }
+
+  deleteCommonArea(id: string): Observable<void> {
+    return this.http
+      .delete<void>(`${this.baseUrl}/areas/${id}`);
+  }
 }

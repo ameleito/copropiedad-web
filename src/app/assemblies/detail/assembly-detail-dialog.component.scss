@@ -502,3 +502,22 @@
   font-size: 0.875rem;
   margin: 0.75rem 0 0;
 }
+
+.item-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.voted-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.78rem;
+  color: var(--mat-sys-secondary, #7b61ff);
+  margin-left: 8px;
+  vertical-align: middle;
+  opacity: 0.85;
+}

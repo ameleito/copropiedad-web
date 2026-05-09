@@ -13,6 +13,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { catchError, finalize, forkJoin, map, of, switchMap } from 'rxjs';
 import { AuthService } from '../../auth/services/auth.service';
 import {
@@ -51,6 +52,7 @@ interface VoteResults {
     MatProgressSpinnerModule,
     MatProgressBarModule,
     MatCheckboxModule,
+    MatTooltipModule,
   ],
   templateUrl: './assembly-detail-dialog.component.html',
   styleUrl: './assembly-detail-dialog.component.scss',
@@ -65,6 +67,10 @@ export class AssemblyDetailDialogComponent implements OnDestroy {
 
   readonly assembly = signal<AssemblyItem>(this.initial);
   readonly agendaItems = signal<AgendaItemModel[]>([]);
+  /** Siempre muestra el más reciente (mayor orderNum) primero */
+  readonly sortedAgendaItems = computed(() =>
+    [...this.agendaItems()].sort((a, b) => b.orderNum - a.orderNum),
+  );
   readonly votesByAgendaId = signal<Record<string, VoteModel[]>>({});
   readonly pageLoading = signal(true);
   readonly loadError = signal<string | null>(null);
@@ -86,6 +92,22 @@ export class AssemblyDetailDialogComponent implements OnDestroy {
 
   readonly pendingVoteOptions = signal<string[]>([]);
   readonly newOptionText = signal('');
+
+  // Delete agenda item
+  readonly deletingItemId = signal<string | null>(null);
+
+  // Edit agenda item
+  readonly editingItemId = signal<string | null>(null);
+  readonly editSubmitting = signal(false);
+  readonly editPendingVoteOptions = signal<string[]>([]);
+  readonly editNewOptionText = signal('');
+
+  readonly editForm = this.fb.nonNullable.group({
+    title: ['', Validators.required],
+    description: [''],
+    requiresVote: [false],
+    voteDurationSeconds: [null as number | null],
+  });
 
   /** Timer countdown: remaining seconds per agenda item id */
   readonly countdowns = signal<Record<string, number>>({});
@@ -312,6 +334,90 @@ export class AssemblyDetailDialogComponent implements OnDestroy {
     this.voteChoice.update((r) => ({ ...r, [itemId]: value }));
   }
 
+  canEditItem(item: AgendaItemModel): boolean {
+    return item.voteStartedAt == null;
+  }
+
+  deleteItem(item: AgendaItemModel): void {
+    if (!confirm(`¿Eliminar el punto "${item.title}"? Esta acción no se puede deshacer.`)) return;
+    this.deletingItemId.set(item.id);
+    this.loadError.set(null);
+    this.assemblyService
+      .deleteAgendaItem(item.id)
+      .pipe(finalize(() => this.deletingItemId.set(null)))
+      .subscribe({
+        next: () => {
+          this.dataChanged.set(true);
+          this.refresh();
+        },
+        error: (err) => {
+          this.loadError.set(err?.error?.message ?? 'No se pudo eliminar el punto de agenda.');
+        },
+      });
+  }
+
+  openEditItem(item: AgendaItemModel): void {
+    this.editingItemId.set(item.id);
+    this.editForm.reset({
+      title: item.title,
+      description: item.description ?? '',
+      requiresVote: item.requiresVote,
+      voteDurationSeconds: item.voteDurationSeconds ?? null,
+    });
+    this.editPendingVoteOptions.set(item.voteOptions ? [...item.voteOptions] : []);
+    this.editNewOptionText.set('');
+  }
+
+  cancelEditItem(): void {
+    this.editingItemId.set(null);
+    this.editNewOptionText.set('');
+  }
+
+  addEditVoteOption(): void {
+    const text = this.editNewOptionText().trim();
+    if (!text) return;
+    if (this.editPendingVoteOptions().includes(text)) return;
+    this.editPendingVoteOptions.update((opts) => [...opts, text]);
+    this.editNewOptionText.set('');
+  }
+
+  removeEditVoteOption(index: number): void {
+    this.editPendingVoteOptions.update((opts) => opts.filter((_, i) => i !== index));
+  }
+
+  submitEditItem(item: AgendaItemModel): void {
+    if (this.editForm.invalid) {
+      this.editForm.markAllAsTouched();
+      return;
+    }
+    const { title, description, requiresVote, voteDurationSeconds } = this.editForm.getRawValue();
+    if (requiresVote && this.editPendingVoteOptions().length < 2) {
+      this.loadError.set('Debe agregar al menos 2 opciones de voto.');
+      return;
+    }
+    this.editSubmitting.set(true);
+    this.loadError.set(null);
+    this.assemblyService
+      .updateAgendaItem(item.id, {
+        title: title.trim(),
+        description: description.trim() || null,
+        requiresVote,
+        voteOptions: requiresVote ? this.editPendingVoteOptions() : undefined,
+        voteDurationSeconds: requiresVote && voteDurationSeconds ? voteDurationSeconds : null,
+      })
+      .pipe(finalize(() => this.editSubmitting.set(false)))
+      .subscribe({
+        next: () => {
+          this.editingItemId.set(null);
+          this.dataChanged.set(true);
+          this.refresh();
+        },
+        error: (err) => {
+          this.loadError.set(err?.error?.message ?? 'No se pudo actualizar el tema.');
+        },
+      });
+  }
+
   close(): void {
     this.dialogRef.close(this.dataChanged());
   }
@@ -444,8 +550,7 @@ export class AssemblyDetailDialogComponent implements OnDestroy {
           this.assembly.set(detail);
           this.selectedStatus.set(detail.status);
           this.isRegisteredAttendee.set(attendee);
-          const sorted = agenda.slice().sort((a, b) => a.orderNum - b.orderNum);
-          this.agendaItems.set(sorted);
+          this.agendaItems.set(agenda);
           const voting = agenda.filter((a) => a.requiresVote);
           if (!voting.length) {
             this.votesByAgendaId.set({});

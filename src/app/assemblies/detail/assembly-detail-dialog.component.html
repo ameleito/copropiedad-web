@@ -193,7 +193,7 @@
         <p class="muted">No hay puntos de agenda todavía.</p>
       } @else {
         <div class="agenda-list">
-          @for (item of agendaItems(); track item.id) {
+          @for (item of sortedAgendaItems(); track item.id) {
             <mat-card class="agenda-card" appearance="outlined">
               <mat-card-header>
                 <mat-card-title>{{ item.title }}</mat-card-title>
@@ -201,8 +201,109 @@
                   @if (item.proposedByName) {
                     <span>Propuesto por {{ item.proposedByName }}</span>
                   }
+                  @if (!canEditItem(item)) {
+                    <span class="voted-badge"><mat-icon inline>how_to_vote</mat-icon> Votación iniciada</span>
+                  }
                 </mat-card-subtitle>
+                @if (isAdmin() && editingItemId() !== item.id) {
+                  <div class="item-actions">
+                    <button mat-icon-button type="button"
+                      [matTooltip]="canEditItem(item) ? 'Editar tema' : 'No se puede editar: la votación ya fue iniciada'"
+                      [disabled]="!canEditItem(item) || deletingItemId() === item.id"
+                      (click)="openEditItem(item)"
+                      aria-label="Editar tema de agenda">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-icon-button type="button" color="warn"
+                      [matTooltip]="canEditItem(item) ? 'Eliminar tema' : 'No se puede eliminar: la votación ya fue iniciada'"
+                      [disabled]="!canEditItem(item) || deletingItemId() === item.id"
+                      (click)="deleteItem(item)"
+                      aria-label="Eliminar tema de agenda">
+                      @if (deletingItemId() === item.id) {
+                        <mat-progress-spinner diameter="18" mode="indeterminate" />
+                      } @else {
+                        <mat-icon>delete</mat-icon>
+                      }
+                    </button>
+                  </div>
+                }
               </mat-card-header>
+
+              @if (editingItemId() === item.id) {
+                <mat-card-content>
+                  <form [formGroup]="editForm" class="add-form">
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Título</mat-label>
+                      <input matInput formControlName="title" />
+                      @if (editForm.controls.title.invalid && editForm.controls.title.touched) {
+                        <mat-error>Requerido</mat-error>
+                      }
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Descripción (opcional)</mat-label>
+                      <textarea matInput rows="2" formControlName="description"></textarea>
+                    </mat-form-field>
+                    <mat-checkbox formControlName="requiresVote">Requiere votación</mat-checkbox>
+
+                    @if (editForm.controls.requiresVote.value) {
+                      <div class="vote-options-builder">
+                        <p class="vote-builder-label">Opciones de voto</p>
+                        <div class="existing-options">
+                          @for (opt of editPendingVoteOptions(); track opt; let i = $index) {
+                            <mat-chip-set>
+                              <mat-chip [removable]="true" (removed)="removeEditVoteOption(i)">
+                                {{ opt }}
+                                <mat-icon matChipRemove>cancel</mat-icon>
+                              </mat-chip>
+                            </mat-chip-set>
+                          }
+                        </div>
+                        <div class="add-option-row">
+                          <mat-form-field appearance="outline" class="option-field">
+                            <mat-label>Nueva opción</mat-label>
+                            <input matInput
+                              [value]="editNewOptionText()"
+                              (input)="editNewOptionText.set($any($event.target).value)"
+                              (keydown.enter)="$event.preventDefault(); addEditVoteOption()"
+                              placeholder="Ej: A favor, En contra..." />
+                          </mat-form-field>
+                          <button mat-icon-button type="button" color="primary" (click)="addEditVoteOption()"
+                            [disabled]="!editNewOptionText().trim()">
+                            <mat-icon>add_circle</mat-icon>
+                          </button>
+                        </div>
+                        @if (editPendingVoteOptions().length < 2) {
+                          <p class="hint-text">Agregue al menos 2 opciones de voto</p>
+                        }
+                        <mat-divider class="timer-divider" />
+                        <p class="vote-builder-label">Temporizador de votación (opcional)</p>
+                        <mat-form-field appearance="outline" class="timer-field">
+                          <mat-label>Duración en segundos</mat-label>
+                          <input matInput type="number" formControlName="voteDurationSeconds"
+                            min="10" placeholder="Ej: 60, 120, 300..." />
+                          <mat-hint>Dejar vacío para votación sin límite de tiempo</mat-hint>
+                        </mat-form-field>
+                      </div>
+                    }
+
+                    <div class="add-actions">
+                      <button mat-button type="button" (click)="cancelEditItem()" [disabled]="editSubmitting()">Cancelar</button>
+                      <button
+                        mat-flat-button
+                        color="primary"
+                        type="button"
+                        (click)="submitEditItem(item)"
+                        [disabled]="editSubmitting() || editForm.invalid">
+                        @if (editSubmitting()) {
+                          <mat-progress-spinner diameter="18" mode="indeterminate" />
+                        } @else {
+                          Guardar cambios
+                        }
+                      </button>
+                    </div>
+                  </form>
+                </mat-card-content>
+              } @else {
               <mat-card-content>
                 @if (item.description) {
                   <p class="desc">{{ item.description }}</p>
@@ -368,6 +469,7 @@
                   </div>
                 }
               </mat-card-content>
+              } <!-- end @else (not editing) -->
             </mat-card>
           }
         </div>

@@ -5,9 +5,11 @@ import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ThemePalette } from '@angular/material/core';
 import { finalize } from 'rxjs/operators';
 import { AuthService } from '../../auth/services/auth.service';
@@ -15,6 +17,7 @@ import { Booking, CommonArea } from '../../core/models/booking.model';
 import { BookingCancelDialogComponent } from '../cancel/booking-cancel-dialog.component';
 import { BookingCreateDialogComponent } from '../create/booking-create-dialog.component';
 import { CommonAreaCreateDialogComponent } from '../create/common-area-create-dialog.component';
+import { CommonAreaDeleteDialogComponent } from '../delete/common-area-delete-dialog.component';
 import { BookingService } from '../services/booking.service';
 
 const STATUS_LABELS: Record<string, string> = {
@@ -38,6 +41,8 @@ const STATUS_LABELS: Record<string, string> = {
     MatProgressSpinnerModule,
     MatDialogModule,
     MatTableModule,
+    MatTooltipModule,
+    MatSnackBarModule,
   ],
   templateUrl: './booking-list.component.html',
   styleUrl: './booking-list.component.scss',
@@ -46,6 +51,7 @@ export class BookingListComponent {
   private readonly bookingService = inject(BookingService);
   private readonly auth = inject(AuthService);
   private readonly dialog = inject(MatDialog);
+  private readonly snackBar = inject(MatSnackBar);
 
   readonly areas = signal<CommonArea[]>([]);
   readonly bookings = signal<Booking[]>([]);
@@ -53,6 +59,7 @@ export class BookingListComponent {
   readonly bookingsLoading = signal(false);
   readonly areasError = signal<string | null>(null);
   readonly bookingsError = signal<string | null>(null);
+  readonly deletingAreaId = signal<string | null>(null);
   readonly totalElements = signal(0);
   readonly pageIndex = signal(0);
   readonly pageSize = signal(20);
@@ -126,6 +133,39 @@ export class BookingListComponent {
     });
     ref.afterClosed().subscribe((updated) => {
       if (updated) this.loadAreas();
+    });
+  }
+
+  openDeleteArea(area: CommonArea): void {
+    const ref = this.dialog.open(CommonAreaDeleteDialogComponent, {
+      width: '480px',
+      data: { area },
+    });
+    ref.afterClosed().subscribe((confirmed) => {
+      if (!confirmed) return;
+      this.deletingAreaId.set(area.id);
+      this.bookingService
+        .deleteCommonArea(area.id)
+        .pipe(finalize(() => this.deletingAreaId.set(null)))
+        .subscribe({
+          next: () => {
+            this.snackBar.open(
+              `Área "${area.name}" eliminada correctamente.`,
+              'Cerrar',
+              { duration: 4000, panelClass: 'snack-success' }
+            );
+            this.loadAreas();
+          },
+          error: (err) => {
+            const msg =
+              err?.error?.message ||
+              `No se pudo eliminar "${area.name}". Puede tener reservas activas o pendientes.`;
+            this.snackBar.open(msg, 'Cerrar', {
+              duration: 6000,
+              panelClass: 'snack-error',
+            });
+          },
+        });
     });
   }
 

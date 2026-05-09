@@ -95,4 +95,23 @@ export class AssemblyService {
       .put<ApiResponse<AgendaItemModel>>(`${this.baseUrl}/agenda/${agendaItemId}/reset-voting`, {})
       .pipe(map((res) => res.data));
   }
+
+  deleteAgendaItem(agendaItemId: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/agenda/${agendaItemId}`);
+  }
+
+  updateAgendaItem(
+    agendaItemId: string,
+    req: {
+      title: string;
+      description?: string | null;
+      requiresVote: boolean;
+      voteOptions?: string[];
+      voteDurationSeconds?: number | null;
+    },
+  ): Observable<AgendaItemModel> {
+    return this.http
+      .put<ApiResponse<AgendaItemModel>>(`${this.baseUrl}/agenda/${agendaItemId}`, req)
+      .pipe(map((res) => res.data));
+  }
 }

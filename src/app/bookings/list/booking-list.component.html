@@ -68,6 +68,20 @@
             </mat-card-content>
             <mat-card-actions align="end">
               @if (isAdmin()) {
+                <button
+                  mat-icon-button
+                  color="warn"
+                  type="button"
+                  matTooltip="Eliminar área"
+                  [disabled]="deletingAreaId() === area.id"
+                  (click)="openDeleteArea(area)"
+                  aria-label="Eliminar área común">
+                  @if (deletingAreaId() === area.id) {
+                    <mat-progress-spinner diameter="20" mode="indeterminate" />
+                  } @else {
+                    <mat-icon>delete</mat-icon>
+                  }
+                </button>
                 <button mat-stroked-button type="button" (click)="openEditArea(area)">
                   <mat-icon>edit</mat-icon>
                   Editar
